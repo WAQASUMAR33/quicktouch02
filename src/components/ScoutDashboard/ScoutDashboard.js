@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PlayerCard from './PlayerCard';
 import ScoutFilters from './ScoutFilters';
 import ScoutFavorites from './ScoutFavorites';
@@ -27,7 +27,7 @@ const ScoutDashboard = () => {
   
   useEffect(() => {
     applyFilters();
-  }, [players, filters]);
+  }, [applyFilters]);
   
   const fetchPlayers = async () => {
     try {
@@ -67,7 +67,7 @@ const ScoutDashboard = () => {
     }
   };
   
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...players];
     
     if (filters.age) {
@@ -95,7 +95,7 @@ const ScoutDashboard = () => {
     }
     
     setFilteredPlayers(filtered);
-  };
+  }, [players, filters]);
   
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);

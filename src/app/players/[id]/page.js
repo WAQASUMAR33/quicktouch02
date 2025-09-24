@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import PlayerProfileCard from '@/components/PlayerProfile/PlayerProfileCard';
 import VideoUploadModal from '@/components/VideoUpload/VideoUploadModal';
@@ -33,9 +33,9 @@ const PlayerProfilePage = ({ params }) => {
     }
     
     fetchPlayerData();
-  }, [params.id, router]);
+  }, [params.id, router, fetchPlayerData]);
   
-  const fetchPlayerData = async () => {
+  const fetchPlayerData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/players/${params.id}`, {
@@ -58,7 +58,7 @@ const PlayerProfilePage = ({ params }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id, router]);
   
   const handleVideoUpload = (newVideo) => {
     setVideos(prev => [newVideo, ...prev]);

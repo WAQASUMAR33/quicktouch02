@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import PlayerProfileCard from '@/components/PlayerProfile/PlayerProfileCard';
 import PlayerProfileForm from '@/components/PlayerProfile/PlayerProfileForm';
 
@@ -123,10 +124,12 @@ const PlayersPage = () => {
                 {/* Player Image */}
                 <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
                   {player.profile_pic ? (
-                    <img
+                    <Image
                       src={player.profile_pic}
                       alt={player.full_name}
-                      className="w-24 h-24 rounded-full object-cover border-4 border-white"
+                      width={96}
+                      height={96}
+                      className="rounded-full object-cover border-4 border-white"
                     />
                   ) : (
                     <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
