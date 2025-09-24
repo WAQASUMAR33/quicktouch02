@@ -1,0 +1,239 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id    Int      @id @default(autoincrement())
+  full_name  String   @db.VarChar(100)
+  email      String   @unique @db.VarChar(150)
+  phone      String?  @db.VarChar(20)
+  password   String   @db.VarChar(255)
+  role       UserRole
+  academy_id Int?
+  profile_pic String? @db.VarChar(255)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  player_profile PlayerProfile?
+  scout_profile  Scout?
+  coach_feedback CoachFeedback[] @relation("CoachFeedback")
+  events_created Event[]
+  training_plans TrainingPlan[]
+  messages_sent Message[] @relation("MessageSender")
+  messages_received Message[] @relation("MessageReceiver")
+
+  @@map("Users")
+}
+
+model PlayerProfile {
+  player_id      Int           @id @default(autoincrement())
+  user_id        Int           @unique
+  age            Int?
+  height_cm      Int?
+  weight_kg      Int?
+  position       String?       @db.VarChar(50)
+  preferred_foot PreferredFoot?
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+
+  // Relations
+  user               User                @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  player_stats       PlayerStat[]
+  highlight_videos   HighlightVideo[]
+  coach_feedback     CoachFeedback[]
+  scout_favorites    ScoutFavorite[]
+  attendance_records Attendance[]
+
+  @@map("PlayerProfiles")
+}
+
+model PlayerStat {
+  stat_id          Int     @id @default(autoincrement())
+  player_id        Int
+  season           String  @db.VarChar(20)
+  matches_played   Int     @default(0)
+  goals            Int     @default(0)
+  assists          Int     @default(0)
+  minutes_played   Int     @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  // Relations
+  player PlayerProfile @relation(fields: [player_id], references: [player_id], onDelete: Cascade)
+
+  @@unique([player_id, season])
+  @@map("PlayerStats")
+}
+
+model HighlightVideo {
+  video_id      Int      @id @default(autoincrement())
+  player_id     Int
+  video_url     String   @db.VarChar(255)
+  description   String?  @db.VarChar(255)
+  uploaded_at   DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relations
+  player PlayerProfile @relation(fields: [player_id], references: [player_id], onDelete: Cascade)
+
+  @@map("HighlightVideos")
+}
+
+model CoachFeedback {
+  feedback_id   Int      @id @default(autoincrement())
+  player_id     Int
+  coach_id      Int
+  rating        Decimal  @db.Decimal(3, 2)
+  notes         String?  @db.Text
+  feedback_date DateTime
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relations
+  player PlayerProfile @relation(fields: [player_id], references: [player_id], onDelete: Cascade)
+  coach  User          @relation("CoachFeedback", fields: [coach_id], references: [user_id], onDelete: Cascade)
+
+  @@map("CoachFeedback")
+}
+
+model Scout {
+  scout_id     Int      @id @default(autoincrement())
+  user_id      Int      @unique
+  organization String?  @db.VarChar(100)
+  verified     Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  // Relations
+  user      User              @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  favorites ScoutFavorite[]
+
+  @@map("Scouts")
+}
+
+model ScoutFavorite {
+  favorite_id Int      @id @default(autoincrement())
+  scout_id    Int
+  player_id   Int
+  added_at    DateTime @default(now())
+
+  // Relations
+  scout  Scout         @relation(fields: [scout_id], references: [scout_id], onDelete: Cascade)
+  player PlayerProfile @relation(fields: [player_id], references: [player_id], onDelete: Cascade)
+
+  @@unique([scout_id, player_id])
+  @@map("ScoutFavorites")
+}
+
+model Event {
+  event_id    Int       @id @default(autoincrement())
+  title       String    @db.VarChar(150)
+  type        EventType
+  event_date  DateTime
+  location    String?   @db.VarChar(150)
+  description String?   @db.Text
+  created_by  Int
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  // Relations
+  creator     User         @relation(fields: [created_by], references: [user_id], onDelete: Cascade)
+  attendance  Attendance[]
+
+  @@map("Events")
+}
+
+model Attendance {
+  attendance_id        Int      @id @default(autoincrement())
+  event_id             Int
+  player_id            Int
+  present              Boolean  @default(false)
+  performance_rating   Decimal? @db.Decimal(3, 2)
+  notes                String?  @db.Text
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  // Relations
+  event  Event         @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
+  player PlayerProfile @relation(fields: [player_id], references: [player_id], onDelete: Cascade)
+
+  @@unique([event_id, player_id])
+  @@map("Attendance")
+}
+
+model TrainingPlan {
+  plan_id      Int      @id @default(autoincrement())
+  coach_id     Int
+  title        String   @db.VarChar(150)
+  description  String?  @db.Text
+  video_url    String?  @db.VarChar(255)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  // Relations
+  coach User @relation(fields: [coach_id], references: [user_id], onDelete: Cascade)
+
+  @@map("TrainingPlans")
+}
+
+model Message {
+  message_id   Int      @id @default(autoincrement())
+  chat_id      Int
+  sender_id    Int
+  receiver_id  Int
+  message_text String   @db.Text
+  sent_at      DateTime @default(now())
+  read_at      DateTime?
+
+  // Relations
+  sender   User @relation("MessageSender", fields: [sender_id], references: [user_id], onDelete: Cascade)
+  receiver User @relation("MessageReceiver", fields: [receiver_id], references: [user_id], onDelete: Cascade)
+
+  @@map("Messages")
+}
+
+model ShopItem {
+  item_id     Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  image_url   String?  @db.VarChar(255)
+  category    String?  @db.VarChar(50)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("ShopItems")
+}
+
+// Enums
+enum UserRole {
+  player
+  parent
+  coach
+  scout
+  admin
+}
+
+enum PreferredFoot {
+  Left
+  Right
+  Both
+}
+
+enum EventType {
+  training
+  match
+  trial
+  showcase
+}
