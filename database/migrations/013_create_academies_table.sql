@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS Academies (
     description TEXT,
     address VARCHAR(255),
     phone VARCHAR(20),
-    email VARCHAR(150),
+    email VARCHAR(150) UNIQUE,
     website VARCHAR(255),
     logo_url VARCHAR(255),
     is_active BOOLEAN DEFAULT TRUE,

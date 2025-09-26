@@ -223,7 +223,7 @@ model Academy {
   description  String?  @db.Text
   address      String?  @db.VarChar(255)
   phone        String?  @db.VarChar(20)
-  email        String?  @db.VarChar(150)
+  email        String?  @unique @db.VarChar(150)
   website      String?  @db.VarChar(255)
   logo_url     String?  @db.VarChar(255)
   is_active    Boolean  @default(true)
