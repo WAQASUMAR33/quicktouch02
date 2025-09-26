@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academy API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏫 Academy API Tester</h1>
+    
+    <div class="container">
+        <h2>Register New Academy</h2>
+        <form id="academyForm">
+            <div class="form-group">
+                <label for="name">Academy Name *</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" name="address">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="text" id="phone" name="phone">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="website">Website</label>
+                <input type="url" id="website" name="website">
+            </div>
+            <div class="form-group">
+                <label for="logo_url">Logo URL</label>
+                <input type="url" id="logo_url" name="logo_url">
+            </div>
+            <button type="submit">Register Academy</button>
+            <button type="button" onclick="fillSampleData()">Fill Sample Data</button>
+        </form>
+        <div id="registerResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>Test Other Endpoints</h2>
+        <button onclick="getAllAcademies()">Get All Academies</button>
+        <button onclick="getAcademyById()">Get Academy by ID</button>
+        <button onclick="testErrorCases()">Test Error Cases</button>
+        <div id="otherResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000/api';
+        let lastAcademyId = null;
+
+        // Fill form with sample data
+        function fillSampleData() {
+            document.getElementById('name').value = 'Real Madrid Academy';
+            document.getElementById('description').value = 'La Fábrica - World-class youth development program';
+            document.getElementById('address').value = 'Ciudad Real Madrid, Valdebebas, Madrid, Spain';
+            document.getElementById('phone').value = '+34 91 398 43 00';
+            document.getElementById('email').value = 'academy@realmadrid.com';
+            document.getElementById('website').value = 'https://www.realmadrid.com/academy';
+            document.getElementById('logo_url').value = 'https://example.com/realmadrid-logo.png';
+        }
+
+        // Handle academy registration form
+        document.getElementById('academyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const academyData = Object.fromEntries(formData.entries());
+            
+            // Remove empty fields
+            Object.keys(academyData).forEach(key => {
+                if (!academyData[key]) delete academyData[key];
+            });
+
+            try {
+                const response = await fetch(`${BASE_URL}/academies/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(academyData)
+                });
+
+                const result = await response.json();
+                displayResponse('registerResponse', response.status, result);
+                
+                if (response.ok && result.academy) {
+                    lastAcademyId = result.academy.academy_id;
+                }
+            } catch (error) {
+                displayResponse('registerResponse', 500, { error: error.message });
+            }
+        });
+
+        // Get all academies
+        async function getAllAcademies() {
+            try {
+                const response = await fetch(`${BASE_URL}/academies`);
+                const result = await response.json();
+                displayResponse('otherResponse', response.status, result);
+            } catch (error) {
+                displayResponse('otherResponse', 500, { error: error.message });
+            }
+        }
+
+        // Get academy by ID
+        async function getAcademyById() {
+            if (!lastAcademyId) {
+                displayResponse('otherResponse', 400, { error: 'No academy ID available. Register an academy first.' });
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/academies/${lastAcademyId}`);
+                const result = await response.json();
+                displayResponse('otherResponse', response.status, result);
+            } catch (error) {
+                displayResponse('otherResponse', 500, { error: error.message });
+            }
+        }
+
+        // Test error cases
+        async function testErrorCases() {
+            const tests = [
+                {
+                    name: 'Missing name field',
+                    url: `${BASE_URL}/academies/register`,
+                    method: 'POST',
+                    body: { description: 'Academy without name', email: 'test@example.com' }
+                },
+                {
+                    name: 'Invalid academy ID',
+                    url: `${BASE_URL}/academies/99999`,
+                    method: 'GET',
+                    body: null
+                }
+            ];
+
+            let results = 'Error Case Tests:\n\n';
+            
+            for (const test of tests) {
+                try {
+                    const options = {
+                        method: test.method,
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+                    
+                    if (test.body) {
+                        options.body = JSON.stringify(test.body);
+                    }
+
+                    const response = await fetch(test.url, options);
+                    const result = await response.json();
+                    
+                    results += `${test.name}:\n`;
+                    results += `Status: ${response.status}\n`;
+                    results += `Response: ${JSON.stringify(result, null, 2)}\n\n`;
+                } catch (error) {
+                    results += `${test.name}: Error - ${error.message}\n\n`;
+                }
+            }
+
+            displayResponse('otherResponse', 200, { message: results });
+        }
+
+        // Display response
+        function displayResponse(elementId, status, data) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `response ${status >= 200 && status < 300 ? 'success' : 'error'}`;
+            element.textContent = `Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
+        }
+    </script>
+</body>
+</html>

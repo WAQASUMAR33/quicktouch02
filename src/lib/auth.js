@@ -90,6 +90,60 @@ export function requireAuth(handler) {
   };
 }
 
+// Academy functions
+export async function createAcademy(academyData) {
+  const { name, description, address, phone, email, website, logo_url } = academyData;
+  
+  return await prisma.academy.create({
+    data: {
+      name,
+      description,
+      address,
+      phone,
+      email,
+      website,
+      logo_url
+    }
+  });
+}
+
+export async function getAcademyById(academyId) {
+  return await prisma.academy.findUnique({
+    where: { academy_id: academyId }
+  });
+}
+
+export async function getAcademyByEmail(email) {
+  return await prisma.academy.findUnique({
+    where: { email }
+  });
+}
+
+export async function getAllAcademies() {
+  return await prisma.academy.findMany({
+    where: { is_active: true },
+    orderBy: { name: 'asc' }
+  });
+}
+
+export async function updateAcademy(academyId, academyData) {
+  const { name, description, address, phone, email, website, logo_url, is_active } = academyData;
+  
+  return await prisma.academy.update({
+    where: { academy_id: academyId },
+    data: {
+      name,
+      description,
+      address,
+      phone,
+      email,
+      website,
+      logo_url,
+      is_active
+    }
+  });
+}
+
 // Middleware for role-based access
 export function requireRole(roles) {
   return (handler) => {

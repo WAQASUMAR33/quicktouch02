@@ -23,13 +23,14 @@ model User {
   updated_at DateTime @updatedAt
 
   // Relations
-  player_profile PlayerProfile?
-  scout_profile  Scout?
-  coach_feedback CoachFeedback[] @relation("CoachFeedback")
-  events_created Event[]
-  training_plans TrainingPlan[]
-  messages_sent Message[] @relation("MessageSender")
-  messages_received Message[] @relation("MessageReceiver")
+  academy         Academy?        @relation(fields: [academy_id], references: [academy_id])
+  player_profile  PlayerProfile?
+  scout_profile   Scout?
+  coach_feedback  CoachFeedback[] @relation("CoachFeedback")
+  events_created  Event[]
+  training_plans  TrainingPlan[]
+  messages_sent   Message[]       @relation("MessageSender")
+  messages_received Message[]     @relation("MessageReceiver")
 
   @@map("Users")
 }
@@ -214,6 +215,25 @@ model ShopItem {
   updated_at  DateTime @updatedAt
 
   @@map("ShopItems")
+}
+
+model Academy {
+  academy_id   Int      @id @default(autoincrement())
+  name         String   @db.VarChar(150)
+  description  String?  @db.Text
+  address      String?  @db.VarChar(255)
+  phone        String?  @db.VarChar(20)
+  email        String?  @db.VarChar(150)
+  website      String?  @db.VarChar(255)
+  logo_url     String?  @db.VarChar(255)
+  is_active    Boolean  @default(true)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  // Relations
+  users User[]
+
+  @@map("Academies")
 }
 
 // Enums
