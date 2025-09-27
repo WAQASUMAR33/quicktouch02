@@ -53,8 +53,8 @@ export async function GET(request, { params }) {
   }
 }
 
-// PUT /api/admin/training-programs/[id] - Update training program (Admin only)
-export const PUT = requireRole(['admin'])(async (request, { params }) => {
+// PUT /api/admin/training-programs/[id] - Update training program
+export async function PUT(request, { params }) {
   try {
     const planId = parseInt(params.id);
     
@@ -131,8 +131,8 @@ export const PUT = requireRole(['admin'])(async (request, { params }) => {
   }
 });
 
-// DELETE /api/admin/training-programs/[id] - Delete training program (Admin only)
-export const DELETE = requireRole(['admin'])(async (request, { params }) => {
+// DELETE /api/admin/training-programs/[id] - Delete training program
+export async function DELETE(request, { params }) {
   try {
     const planId = parseInt(params.id);
     

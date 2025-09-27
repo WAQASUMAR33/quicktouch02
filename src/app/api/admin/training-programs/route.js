@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { requireRole, createTrainingProgram, getAllTrainingPrograms, updateTrainingProgram, deleteTrainingProgram } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-// GET /api/admin/training-programs - Get all training programs (Admin only)
-export const GET = requireRole(['admin'])(async (req) => {
+// GET /api/admin/training-programs - Get all training programs
+export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const academyId = searchParams.get('academy_id');
@@ -74,8 +74,8 @@ export const GET = requireRole(['admin'])(async (req) => {
   }
 });
 
-// POST /api/admin/training-programs - Create new training program (Admin only)
-export const POST = requireRole(['admin'])(async (req) => {
+// POST /api/admin/training-programs - Create new training program
+export async function POST(req) {
   try {
     const { 
       coach_id,

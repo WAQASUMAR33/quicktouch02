@@ -3,15 +3,15 @@ import { requireRole, createTrainingProgram, getTrainingProgramsByCoach, getAllT
 import prisma from '@/lib/prisma';
 
 // GET /api/coach/training-plans - Get training plans
-export const GET = requireRole(['coach', 'admin', 'player'])(async (req) => {
+export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const academyId = searchParams.get('academy_id');
 
     let trainingPlans;
 
-    if (req.user.role === 'admin' && academyId) {
-      // Admin can view all training plans for a specific academy
+    if (academyId) {
+      // Get training plans for a specific academy
       trainingPlans = await prisma.trainingPlan.findMany({
         where: { academy_id: parseInt(academyId) },
         include: {
@@ -35,12 +35,9 @@ export const GET = requireRole(['coach', 'admin', 'player'])(async (req) => {
           { created_at: 'desc' }
         ]
       });
-    } else if (req.user.role === 'admin') {
-      // Admin can view all training plans
-      trainingPlans = await getAllTrainingPrograms();
     } else {
-      // Coach can only view their own training plans
-      trainingPlans = await getTrainingProgramsByCoach(req.user.userId);
+      // Get all training plans
+      trainingPlans = await getAllTrainingPrograms();
     }
 
     return NextResponse.json({ 
@@ -58,10 +55,10 @@ export const GET = requireRole(['coach', 'admin', 'player'])(async (req) => {
 });
 
 // POST /api/coach/training-plans - Create new training plan
-export const POST = requireRole(['coach', 'admin'])(async (req) => {
+export async function POST(req) {
   try {
-    const coachId = req.user.userId;
     const { 
+      coach_id,
       title, 
       title_type, 
       venue, 
@@ -74,9 +71,9 @@ export const POST = requireRole(['coach', 'admin'])(async (req) => {
     } = await req.json();
 
     // Validate required fields
-    if (!title || !title_type || !academy_id) {
+    if (!title || !title_type || !academy_id || !coach_id) {
       return NextResponse.json(
-        { error: 'Title, title type, and academy ID are required' },
+        { error: 'Title, title type, academy ID, and coach ID are required' },
         { status: 400 }
       );
     }
@@ -99,7 +96,7 @@ export const POST = requireRole(['coach', 'admin'])(async (req) => {
     }
 
     const trainingPlan = await createTrainingProgram({
-      coach_id: coachId,
+      coach_id: parseInt(coach_id),
       academy_id: parseInt(academy_id),
       title,
       title_type,
