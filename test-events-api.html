@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .api-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .api-section h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .success {
+            background-color: #27ae60;
+        }
+        .error {
+            background-color: #e74c3c;
+        }
+        .warning {
+            background-color: #f39c12;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .response {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .sample-data {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Events API Tester</h1>
+        <div class="status info">
+            <strong>API Base URL:</strong> https://quicktouch02.vercel.app/api/admin/events
+        </div>
+        
+        <!-- Sample Data Section -->
+        <div class="api-section">
+            <h3>📋 Sample Event Data</h3>
+            <p>Click the buttons below to test different event types:</p>
+            
+            <button onclick="setSampleData('trial')">Trial Event</button>
+            <button onclick="setSampleData('showcase')">Showcase Event</button>
+            <button onclick="setSampleData('guestSession')">Guest Session</button>
+            <button onclick="setSampleData('training')">Training Event</button>
+            <button onclick="setSampleData('match')">Match Event</button>
+            <button onclick="setSampleData('completed')">Completed Event</button>
+            
+            <div class="sample-data" id="sampleDataDisplay">
+                Click a button above to see sample data
+            </div>
+        </div>
+
+        <!-- Create Event Section -->
+        <div class="api-section">
+            <h3>➕ Create New Event</h3>
+            <textarea id="eventData" placeholder="Enter event data in JSON format...">
+{
+  "title": "U-16 Trial Session",
+  "type": "Trial",
+  "event_date": "2024-03-01T14:00:00.000Z",
+  "event_time": "2:00 PM",
+  "location": "Main Stadium",
+  "description": "Trial session for U-16 players. Full kit required.",
+  "status": "Pending",
+  "created_by": 1
+}
+            </textarea>
+            <button onclick="createEvent()">Create Event</button>
+            <button onclick="clearResponse()">Clear Response</button>
+            <div class="response" id="createResponse">Response will appear here...</div>
+        </div>
+
+        <!-- Get All Events Section -->
+        <div class="api-section">
+            <h3>📋 Get All Events</h3>
+            <button onclick="getAllEvents()">Get All Events</button>
+            <button onclick="getEventsByStatus('Pending')">Get Pending Events</button>
+            <button onclick="getEventsByStatus('Complete')">Get Complete Events</button>
+            <button onclick="getEventsByType('Trial')">Get Trial Events</button>
+            <button onclick="getEventsByType('Showcase')">Get Showcase Events</button>
+            <div class="response" id="getAllResponse">Response will appear here...</div>
+        </div>
+
+        <!-- Get Event by ID Section -->
+        <div class="api-section">
+            <h3>🔍 Get Event by ID</h3>
+            <input type="number" id="eventId" placeholder="Enter Event ID" style="padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 3px;">
+            <button onclick="getEventById()">Get Event by ID</button>
+            <button onclick="updateEvent()">Update Event</button>
+            <button onclick="deleteEvent()">Delete Event</button>
+            <div class="response" id="getByIdResponse">Response will appear here...</div>
+        </div>
+
+        <!-- Update Event Section -->
+        <div class="api-section">
+            <h3>✏️ Update Event Data</h3>
+            <textarea id="updateData" placeholder="Enter update data in JSON format...">
+{
+  "title": "Updated Event Title",
+  "description": "This event has been updated.",
+  "status": "Complete"
+}
+            </textarea>
+        </div>
+
+        <!-- Bulk Test Section -->
+        <div class="api-section">
+            <h3>🚀 Bulk Test Operations</h3>
+            <button onclick="runBulkTests()" class="warning">Run All Tests</button>
+            <button onclick="clearAllResponses()">Clear All Responses</button>
+            <div class="response" id="bulkTestResponse">Bulk test results will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://quicktouch02.vercel.app/api/admin/events';
+        
+        const sampleEvents = {
+            trial: {
+                title: "U-16 Trial Session",
+                type: "Trial",
+                event_date: "2024-03-01T14:00:00.000Z",
+                event_time: "2:00 PM",
+                location: "Main Stadium",
+                description: "Trial session for U-16 players. Full kit required. Bring water bottles and shin guards.",
+                status: "Pending",
+                created_by: 1
+            },
+            showcase: {
+                title: "Annual Player Showcase",
+                type: "Showcase",
+                event_date: "2024-03-15T16:00:00.000Z",
+                event_time: "4:00 PM",
+                location: "Academy Hall",
+                description: "Annual showcase event to display academy talent to scouts and parents. All age groups welcome.",
+                status: "Pending",
+                created_by: 1
+            },
+            guestSession: {
+                title: "Guest Coach Session with Professional Player",
+                type: "GuestSessions",
+                event_date: "2024-03-10T10:00:00.000Z",
+                event_time: "10:00 AM",
+                location: "Training Field 2",
+                description: "Special session with guest coach from Manchester United Academy. Focus on advanced techniques.",
+                status: "Pending",
+                created_by: 1
+            },
+            training: {
+                title: "Weekly Training Session",
+                type: "training",
+                event_date: "2024-03-05T17:00:00.000Z",
+                event_time: "5:00 PM",
+                location: "Training Field 1",
+                description: "Regular weekly training session focusing on fitness and basic skills.",
+                status: "Pending",
+                created_by: 1
+            },
+            match: {
+                title: "Inter-Academy Match",
+                type: "match",
+                event_date: "2024-03-20T15:00:00.000Z",
+                event_time: "3:00 PM",
+                location: "Main Stadium",
+                description: "Friendly match against City Academy. All academy players welcome to watch.",
+                status: "Pending",
+                created_by: 1
+            },
+            completed: {
+                title: "Completed Training Session",
+                type: "training",
+                event_date: "2024-02-28T17:00:00.000Z",
+                event_time: "5:00 PM",
+                location: "Training Field 1",
+                description: "Completed training session from last week.",
+                status: "Complete",
+                created_by: 1
+            }
+        };
+
+        function setSampleData(type) {
+            document.getElementById('eventData').value = JSON.stringify(sampleEvents[type], null, 2);
+            document.getElementById('sampleDataDisplay').textContent = `Sample ${type} event data loaded!`;
+        }
+
+        function displayResponse(elementId, response, status) {
+            const element = document.getElementById(elementId);
+            const statusClass = status >= 200 && status < 300 ? 'success' : 'error';
+            element.innerHTML = `<div class="status ${statusClass}">Status: ${status}</div>${JSON.stringify(response, null, 2)}`;
+        }
+
+        function clearResponse() {
+            document.getElementById('createResponse').textContent = 'Response cleared...';
+        }
+
+        function clearAllResponses() {
+            const responseElements = ['createResponse', 'getAllResponse', 'getByIdResponse', 'bulkTestResponse'];
+            responseElements.forEach(id => {
+                document.getElementById(id).textContent = 'Response cleared...';
+            });
+        }
+
+        async function createEvent() {
+            try {
+                const eventData = JSON.parse(document.getElementById('eventData').value);
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(eventData)
+                });
+                const data = await response.json();
+                displayResponse('createResponse', data, response.status);
+            } catch (error) {
+                displayResponse('createResponse', { error: error.message }, 500);
+            }
+        }
+
+        async function getAllEvents() {
+            try {
+                const response = await fetch(API_BASE);
+                const data = await response.json();
+                displayResponse('getAllResponse', data, response.status);
+            } catch (error) {
+                displayResponse('getAllResponse', { error: error.message }, 500);
+            }
+        }
+
+        async function getEventsByStatus(status) {
+            try {
+                const response = await fetch(`${API_BASE}?status=${status}`);
+                const data = await response.json();
+                displayResponse('getAllResponse', data, response.status);
+            } catch (error) {
+                displayResponse('getAllResponse', { error: error.message }, 500);
+            }
+        }
+
+        async function getEventsByType(type) {
+            try {
+                const response = await fetch(`${API_BASE}?type=${type}`);
+                const data = await response.json();
+                displayResponse('getAllResponse', data, response.status);
+            } catch (error) {
+                displayResponse('getAllResponse', { error: error.message }, 500);
+            }
+        }
+
+        async function getEventById() {
+            const eventId = document.getElementById('eventId').value;
+            if (!eventId) {
+                displayResponse('getByIdResponse', { error: 'Please enter an Event ID' }, 400);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/${eventId}`);
+                const data = await response.json();
+                displayResponse('getByIdResponse', data, response.status);
+            } catch (error) {
+                displayResponse('getByIdResponse', { error: error.message }, 500);
+            }
+        }
+
+        async function updateEvent() {
+            const eventId = document.getElementById('eventId').value;
+            if (!eventId) {
+                displayResponse('getByIdResponse', { error: 'Please enter an Event ID' }, 400);
+                return;
+            }
+            
+            try {
+                const updateData = JSON.parse(document.getElementById('updateData').value);
+                const response = await fetch(`${API_BASE}/${eventId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                const data = await response.json();
+                displayResponse('getByIdResponse', data, response.status);
+            } catch (error) {
+                displayResponse('getByIdResponse', { error: error.message }, 500);
+            }
+        }
+
+        async function deleteEvent() {
+            const eventId = document.getElementById('eventId').value;
+            if (!eventId) {
+                displayResponse('getByIdResponse', { error: 'Please enter an Event ID' }, 400);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/${eventId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                displayResponse('getByIdResponse', data, response.status);
+            } catch (error) {
+                displayResponse('getByIdResponse', { error: error.message }, 500);
+            }
+        }
+
+        async function runBulkTests() {
+            const results = [];
+            
+            // Test 1: Get all events
+            try {
+                const response = await fetch(API_BASE);
+                const data = await response.json();
+                results.push(`✅ GET All Events: Status ${response.status} - Found ${data.events?.length || 0} events`);
+            } catch (error) {
+                results.push(`❌ GET All Events: Error - ${error.message}`);
+            }
+
+            // Test 2: Create a trial event
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sampleEvents.trial)
+                });
+                const data = await response.json();
+                results.push(`✅ Create Trial Event: Status ${response.status} - Event ID: ${data.event?.event_id || 'N/A'}`);
+            } catch (error) {
+                results.push(`❌ Create Trial Event: Error - ${error.message}`);
+            }
+
+            // Test 3: Filter by status
+            try {
+                const response = await fetch(`${API_BASE}?status=Pending`);
+                const data = await response.json();
+                results.push(`✅ Filter by Status: Status ${response.status} - Found ${data.events?.length || 0} pending events`);
+            } catch (error) {
+                results.push(`❌ Filter by Status: Error - ${error.message}`);
+            }
+
+            // Test 4: Filter by type
+            try {
+                const response = await fetch(`${API_BASE}?type=Trial`);
+                const data = await response.json();
+                results.push(`✅ Filter by Type: Status ${response.status} - Found ${data.events?.length || 0} trial events`);
+            } catch (error) {
+                results.push(`❌ Filter by Type: Error - ${error.message}`);
+            }
+
+            // Test 5: Test error case (invalid data)
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: "Invalid Event" })
+                });
+                results.push(`✅ Error Handling: Status ${response.status} - ${response.status === 400 ? 'Correctly rejected invalid data' : 'Unexpected response'}`);
+            } catch (error) {
+                results.push(`❌ Error Handling: Error - ${error.message}`);
+            }
+
+            document.getElementById('bulkTestResponse').innerHTML = results.join('\n');
+        }
+    </script>
+</body>
+</html>
