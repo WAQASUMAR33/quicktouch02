@@ -5,7 +5,6 @@ import prisma from '@/lib/prisma';
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get('status');
     const type = searchParams.get('type');
 
     let whereClause = {};
@@ -15,17 +14,19 @@ export async function GET(req) {
       whereClause.type = type;
     }
 
-    // Get events without the new fields that don't exist yet
+    // Get events using only existing database columns
     const events = await prisma.event.findMany({
       where: whereClause,
-      include: {
-        creator: {
-          select: {
-            user_id: true,
-            full_name: true,
-            email: true
-          }
-        }
+      select: {
+        event_id: true,
+        title: true,
+        type: true,
+        event_date: true,
+        location: true,
+        description: true,
+        created_by: true,
+        created_at: true,
+        updated_at: true
       },
       orderBy: [
         { event_date: 'asc' },
@@ -37,7 +38,7 @@ export async function GET(req) {
       success: true,
       events: events,
       message: "Events retrieved successfully (simplified version)",
-      note: "This is a simplified version that works with the current database schema"
+      note: "This is a simplified version that works with the current database schema - only includes existing columns"
     });
 
   } catch (error) {
