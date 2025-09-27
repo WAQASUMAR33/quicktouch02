@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
 import prisma from './prisma.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -73,20 +74,20 @@ export async function updateUser(userId, userData) {
 
 // Middleware for protecting routes
 export function requireAuth(handler) {
-  return async (req, res) => {
+  return async (req) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     
     if (!token) {
-      return res.status(401).json({ error: 'No token provided' });
+      return NextResponse.json({ error: 'No token provided' }, { status: 401 });
     }
     
     const decoded = verifyToken(token);
     if (!decoded) {
-      return res.status(401).json({ error: 'Invalid token' });
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
     
     req.user = decoded;
-    return handler(req, res);
+    return handler(req);
   };
 }
 
@@ -286,11 +287,11 @@ export async function deleteTrainingProgram(planId) {
 // Middleware for role-based access
 export function requireRole(roles) {
   return (handler) => {
-    return requireAuth(async (req, res) => {
+    return requireAuth(async (req) => {
       if (!roles.includes(req.user.role)) {
-        return res.status(403).json({ error: 'Insufficient permissions' });
+        return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
       }
-      return handler(req, res);
+      return handler(req);
     });
   };
 }
