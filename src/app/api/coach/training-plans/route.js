@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireRole, createTrainingProgram, getTrainingProgramsByCoach, getAllTrainingPrograms } from '@/lib/auth';
+import { createTrainingProgram, getAllTrainingPrograms } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 // GET /api/coach/training-plans - Get training plans
@@ -135,120 +135,6 @@ export async function POST(req) {
       { status: 500 }
     );
   }
-});
+}
 
-// PUT /api/coach/training-plans/[id] - Update training plan
-export const PUT = requireRole(['coach'])(async (req) => {
-  try {
-    const { searchParams } = new URL(req.url);
-    const planId = parseInt(searchParams.get('id'));
-    const coachId = req.user.userId;
-    const { title, description, video_url } = await req.json();
 
-    if (!planId) {
-      return NextResponse.json(
-        { error: 'Plan ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // Check if plan exists and belongs to coach
-    const existingPlan = await prisma.trainingPlan.findUnique({
-      where: { plan_id: planId }
-    });
-
-    if (!existingPlan) {
-      return NextResponse.json(
-        { error: 'Training plan not found' },
-        { status: 404 }
-      );
-    }
-
-    if (existingPlan.coach_id !== coachId) {
-      return NextResponse.json(
-        { error: 'Unauthorized to update this training plan' },
-        { status: 403 }
-      );
-    }
-
-    const updatedPlan = await prisma.trainingPlan.update({
-      where: { plan_id: planId },
-      data: {
-        ...(title && { title }),
-        ...(description && { description }),
-        ...(video_url && { video_url })
-      },
-      include: {
-        coach: {
-          select: {
-            full_name: true
-          }
-        }
-      }
-    });
-
-    return NextResponse.json({
-      success: true,
-      training_plan: updatedPlan,
-      message: 'Training plan updated successfully'
-    });
-
-  } catch (error) {
-    console.error('Error updating training plan:', error);
-    return NextResponse.json(
-      { error: 'Failed to update training plan' },
-      { status: 500 }
-    );
-  }
-});
-
-// DELETE /api/coach/training-plans/[id] - Delete training plan
-export const DELETE = requireRole(['coach'])(async (req) => {
-  try {
-    const { searchParams } = new URL(req.url);
-    const planId = parseInt(searchParams.get('id'));
-    const coachId = req.user.userId;
-
-    if (!planId) {
-      return NextResponse.json(
-        { error: 'Plan ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // Check if plan exists and belongs to coach
-    const existingPlan = await prisma.trainingPlan.findUnique({
-      where: { plan_id: planId }
-    });
-
-    if (!existingPlan) {
-      return NextResponse.json(
-        { error: 'Training plan not found' },
-        { status: 404 }
-      );
-    }
-
-    if (existingPlan.coach_id !== coachId) {
-      return NextResponse.json(
-        { error: 'Unauthorized to delete this training plan' },
-        { status: 403 }
-      );
-    }
-
-    await prisma.trainingPlan.delete({
-      where: { plan_id: planId }
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Training plan deleted successfully'
-    });
-
-  } catch (error) {
-    console.error('Error deleting training plan:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete training plan' },
-      { status: 500 }
-    );
-  }
-});

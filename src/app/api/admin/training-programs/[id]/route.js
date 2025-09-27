@@ -129,7 +129,7 @@ export async function PUT(request, { params }) {
       { status: 500 }
     );
   }
-});
+}
 
 // DELETE /api/admin/training-programs/[id] - Delete training program
 export async function DELETE(request, { params }) {
