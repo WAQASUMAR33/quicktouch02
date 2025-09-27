@@ -5,7 +5,7 @@ export async function POST() {
   try {
     console.log('Testing event creation...');
     
-    // Try to create a simple event
+    // Try to create a simple event with only confirmed existing fields
     const testEvent = {
       title: "Test Event",
       type: "training",
