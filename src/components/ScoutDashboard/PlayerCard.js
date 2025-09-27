@@ -200,3 +200,6 @@ const PlayerCard = ({ player, isFavorite, onAddFavorite, onRemoveFavorite, onCon
 
 export default PlayerCard;
 
+
+
+

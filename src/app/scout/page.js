@@ -65,3 +65,6 @@ const ScoutPage = () => {
 
 export default ScoutPage;
 
+
+
+

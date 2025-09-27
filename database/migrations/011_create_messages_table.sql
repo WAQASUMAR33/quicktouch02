@@ -20,3 +20,6 @@ CREATE TABLE IF NOT EXISTS Messages (
     INDEX idx_read_at (read_at)
 );
 
+
+
+

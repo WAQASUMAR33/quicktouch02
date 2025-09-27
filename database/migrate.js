@@ -154,3 +154,6 @@ if (command === 'migrate') {
   process.exit(1);
 }
 
+
+
+

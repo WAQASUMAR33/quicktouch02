@@ -130,3 +130,6 @@ NODE_ENV=development
 - Test database connection manually
 - Review migration file syntax
 
+
+
+

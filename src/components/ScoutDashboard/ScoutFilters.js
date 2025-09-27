@@ -193,3 +193,6 @@ const ScoutFilters = ({ filters, onFilterChange, onClearFilters }) => {
 
 export default ScoutFilters;
 
+
+
+

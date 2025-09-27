@@ -172,16 +172,23 @@ model Attendance {
 }
 
 model TrainingPlan {
-  plan_id      Int      @id @default(autoincrement())
+  plan_id      Int           @id @default(autoincrement())
   coach_id     Int
-  title        String   @db.VarChar(150)
-  description  String?  @db.Text
-  video_url    String?  @db.VarChar(255)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  academy_id   Int
+  title        String        @db.VarChar(150)
+  title_type   TrainingType
+  venue        String?       @db.VarChar(255)
+  program_date DateTime?
+  program_time String?       @db.VarChar(20)
+  details      String?       @db.Text
+  status       ProgramStatus @default(upcoming)
+  video_url    String?       @db.VarChar(255)
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 
   // Relations
-  coach User @relation(fields: [coach_id], references: [user_id], onDelete: Cascade)
+  coach   User    @relation(fields: [coach_id], references: [user_id], onDelete: Cascade)
+  academy Academy @relation(fields: [academy_id], references: [academy_id], onDelete: Cascade)
 
   @@map("TrainingPlans")
 }
@@ -218,20 +225,21 @@ model ShopItem {
 }
 
 model Academy {
-  academy_id   Int      @id @default(autoincrement())
-  name         String   @db.VarChar(150)
-  description  String?  @db.Text
-  address      String?  @db.VarChar(255)
-  phone        String?  @db.VarChar(20)
-  email        String?  @unique @db.VarChar(150)
-  website      String?  @db.VarChar(255)
-  logo_url     String?  @db.VarChar(255)
-  is_active    Boolean  @default(true)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  academy_id     Int            @id @default(autoincrement())
+  name           String         @db.VarChar(150)
+  description    String?        @db.Text
+  address        String?        @db.VarChar(255)
+  phone          String?        @db.VarChar(20)
+  email          String?        @unique @db.VarChar(150)
+  website        String?        @db.VarChar(255)
+  logo_url       String?        @db.VarChar(255)
+  is_active      Boolean        @default(true)
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
 
   // Relations
-  users User[]
+  users           User[]
+  training_plans  TrainingPlan[]
 
   @@map("Academies")
 }
@@ -256,4 +264,15 @@ enum EventType {
   match
   trial
   showcase
+}
+
+enum TrainingType {
+  Match
+  TrainingProgram
+  Drill
+}
+
+enum ProgramStatus {
+  upcoming
+  Complete
 }

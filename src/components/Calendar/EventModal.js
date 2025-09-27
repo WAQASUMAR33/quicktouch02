@@ -204,3 +204,6 @@ const EventModal = ({ isOpen, onClose, event, onSubmit, mode = 'create' }) => {
 
 export default EventModal;
 
+
+
+

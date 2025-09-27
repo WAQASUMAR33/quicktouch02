@@ -144,6 +144,145 @@ export async function updateAcademy(academyId, academyData) {
   });
 }
 
+// Training Program functions
+export async function createTrainingProgram(trainingData) {
+  const { coach_id, academy_id, title, title_type, venue, program_date, program_time, details, status, video_url } = trainingData;
+  
+  return await prisma.trainingPlan.create({
+    data: {
+      coach_id,
+      academy_id,
+      title,
+      title_type,
+      venue,
+      program_date,
+      program_time,
+      details,
+      status,
+      video_url
+    }
+  });
+}
+
+export async function getTrainingProgramById(planId) {
+  return await prisma.trainingPlan.findUnique({
+    where: { plan_id: planId },
+    include: {
+      coach: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true
+        }
+      },
+      academy: {
+        select: {
+          academy_id: true,
+          name: true
+        }
+      }
+    }
+  });
+}
+
+export async function getTrainingProgramsByAcademy(academyId) {
+  return await prisma.trainingPlan.findMany({
+    where: { academy_id: academyId },
+    include: {
+      coach: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true
+        }
+      },
+      academy: {
+        select: {
+          academy_id: true,
+          name: true
+        }
+      }
+    },
+    orderBy: [
+      { program_date: 'asc' },
+      { created_at: 'desc' }
+    ]
+  });
+}
+
+export async function getTrainingProgramsByCoach(coachId) {
+  return await prisma.trainingPlan.findMany({
+    where: { coach_id: coachId },
+    include: {
+      coach: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true
+        }
+      },
+      academy: {
+        select: {
+          academy_id: true,
+          name: true
+        }
+      }
+    },
+    orderBy: [
+      { program_date: 'asc' },
+      { created_at: 'desc' }
+    ]
+  });
+}
+
+export async function getAllTrainingPrograms() {
+  return await prisma.trainingPlan.findMany({
+    include: {
+      coach: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true
+        }
+      },
+      academy: {
+        select: {
+          academy_id: true,
+          name: true
+        }
+      }
+    },
+    orderBy: [
+      { program_date: 'asc' },
+      { created_at: 'desc' }
+    ]
+  });
+}
+
+export async function updateTrainingProgram(planId, trainingData) {
+  const { title, title_type, venue, program_date, program_time, details, status, video_url } = trainingData;
+  
+  return await prisma.trainingPlan.update({
+    where: { plan_id: planId },
+    data: {
+      title,
+      title_type,
+      venue,
+      program_date,
+      program_time,
+      details,
+      status,
+      video_url
+    }
+  });
+}
+
+export async function deleteTrainingProgram(planId) {
+  return await prisma.trainingPlan.delete({
+    where: { plan_id: planId }
+  });
+}
+
 // Middleware for role-based access
 export function requireRole(roles) {
   return (handler) => {

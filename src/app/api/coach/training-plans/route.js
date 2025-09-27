@@ -1,36 +1,52 @@
 import { NextResponse } from 'next/server';
-import { requireRole } from '@/lib/auth';
+import { requireRole, createTrainingProgram, getTrainingProgramsByCoach, getAllTrainingPrograms } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 // GET /api/coach/training-plans - Get training plans
 export const GET = requireRole(['coach', 'admin', 'player'])(async (req) => {
   try {
     const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get('limit')) || 50;
-    const offset = parseInt(searchParams.get('offset')) || 0;
+    const academyId = searchParams.get('academy_id');
 
-    const whereClause = {};
-    if (req.user.role === 'coach') {
-      whereClause.coach_id = req.user.userId;
+    let trainingPlans;
+
+    if (req.user.role === 'admin' && academyId) {
+      // Admin can view all training plans for a specific academy
+      trainingPlans = await prisma.trainingPlan.findMany({
+        where: { academy_id: parseInt(academyId) },
+        include: {
+          coach: {
+            select: {
+              user_id: true,
+              full_name: true,
+              email: true,
+              profile_pic: true
+            }
+          },
+          academy: {
+            select: {
+              academy_id: true,
+              name: true
+            }
+          }
+        },
+        orderBy: [
+          { program_date: 'asc' },
+          { created_at: 'desc' }
+        ]
+      });
+    } else if (req.user.role === 'admin') {
+      // Admin can view all training plans
+      trainingPlans = await getAllTrainingPrograms();
+    } else {
+      // Coach can only view their own training plans
+      trainingPlans = await getTrainingProgramsByCoach(req.user.userId);
     }
 
-    const trainingPlans = await prisma.trainingPlan.findMany({
-      where: whereClause,
-      include: {
-        coach: {
-          select: {
-            full_name: true,
-            email: true,
-            profile_pic: true
-          }
-        }
-      },
-      skip: offset,
-      take: limit,
-      orderBy: { created_at: 'desc' }
+    return NextResponse.json({ 
+      success: true,
+      training_plans: trainingPlans 
     });
-
-    return NextResponse.json({ training_plans: trainingPlans });
 
   } catch (error) {
     console.error('Error fetching training plans:', error);
@@ -42,38 +58,77 @@ export const GET = requireRole(['coach', 'admin', 'player'])(async (req) => {
 });
 
 // POST /api/coach/training-plans - Create new training plan
-export const POST = requireRole(['coach'])(async (req) => {
+export const POST = requireRole(['coach', 'admin'])(async (req) => {
   try {
     const coachId = req.user.userId;
-    const { title, description, video_url } = await req.json();
+    const { 
+      title, 
+      title_type, 
+      venue, 
+      program_date, 
+      program_time, 
+      details, 
+      academy_id, 
+      status, 
+      video_url 
+    } = await req.json();
 
-    if (!title) {
+    // Validate required fields
+    if (!title || !title_type || !academy_id) {
       return NextResponse.json(
-        { error: 'Title is required' },
+        { error: 'Title, title type, and academy ID are required' },
         { status: 400 }
       );
     }
 
-    const trainingPlan = await prisma.trainingPlan.create({
-      data: {
-        coach_id: coachId,
-        title,
-        description,
-        video_url
-      },
-      include: {
-        coach: {
-          select: {
-            full_name: true
-          }
-        }
-      }
+    // Validate title_type
+    const validTitleTypes = ['Match', 'TrainingProgram', 'Drill'];
+    if (!validTitleTypes.includes(title_type)) {
+      return NextResponse.json(
+        { error: 'Title type must be one of: Match, TrainingProgram, Drill' },
+        { status: 400 }
+      );
+    }
+
+    // Validate status if provided
+    if (status && !['upcoming', 'Complete'].includes(status)) {
+      return NextResponse.json(
+        { error: 'Status must be either "upcoming" or "Complete"' },
+        { status: 400 }
+      );
+    }
+
+    const trainingPlan = await createTrainingProgram({
+      coach_id: coachId,
+      academy_id: parseInt(academy_id),
+      title,
+      title_type,
+      venue,
+      program_date: program_date ? new Date(program_date) : null,
+      program_time,
+      details,
+      status: status || 'upcoming',
+      video_url
     });
 
     return NextResponse.json({
       success: true,
-      training_plan: trainingPlan,
-      message: 'Training plan created successfully'
+      training_plan: {
+        plan_id: trainingPlan.plan_id,
+        title: trainingPlan.title,
+        title_type: trainingPlan.title_type,
+        venue: trainingPlan.venue,
+        program_date: trainingPlan.program_date,
+        program_time: trainingPlan.program_time,
+        details: trainingPlan.details,
+        status: trainingPlan.status,
+        video_url: trainingPlan.video_url,
+        academy_id: trainingPlan.academy_id,
+        coach_id: trainingPlan.coach_id,
+        created_at: trainingPlan.created_at,
+        updated_at: trainingPlan.updated_at
+      },
+      message: 'Training program created successfully'
     }, { status: 201 });
 
   } catch (error) {

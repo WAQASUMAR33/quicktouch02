@@ -147,3 +147,6 @@ SHOW TABLES;
 
 Your MySQL connection is now ready! 🚀
 
+
+
+

@@ -19,3 +19,6 @@ CREATE TABLE IF NOT EXISTS ShopItems (
     INDEX idx_price (price)
 );
 
+
+
+
