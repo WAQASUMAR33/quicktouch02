@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireRole, getTrainingProgramById, updateTrainingProgram, deleteTrainingProgram } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 
 // GET /api/admin/training-programs/[id] - Get specific training program (Admin only)
 export async function GET(request, { params }) {
