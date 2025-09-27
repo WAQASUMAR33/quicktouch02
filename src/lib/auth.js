@@ -284,6 +284,118 @@ export async function deleteTrainingProgram(planId) {
   });
 }
 
+// Event functions
+export async function createEvent(eventData) {
+  const { title, type, event_date, event_time, location, description, status, created_by } = eventData;
+  
+  return await prisma.event.create({
+    data: {
+      title,
+      type,
+      event_date,
+      event_time,
+      location,
+      description,
+      status,
+      created_by
+    }
+  });
+}
+
+export async function getEventById(eventId) {
+  return await prisma.event.findUnique({
+    where: { event_id: eventId },
+    include: {
+      creator: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true
+        }
+      }
+    }
+  });
+}
+
+export async function getAllEvents() {
+  return await prisma.event.findMany({
+    include: {
+      creator: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true
+        }
+      }
+    },
+    orderBy: [
+      { event_date: 'asc' },
+      { created_at: 'desc' }
+    ]
+  });
+}
+
+export async function getEventsByStatus(status) {
+  return await prisma.event.findMany({
+    where: { status },
+    include: {
+      creator: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true
+        }
+      }
+    },
+    orderBy: [
+      { event_date: 'asc' },
+      { created_at: 'desc' }
+    ]
+  });
+}
+
+export async function getEventsByType(type) {
+  return await prisma.event.findMany({
+    where: { type },
+    include: {
+      creator: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true
+        }
+      }
+    },
+    orderBy: [
+      { event_date: 'asc' },
+      { created_at: 'desc' }
+    ]
+  });
+}
+
+export async function updateEvent(eventId, eventData) {
+  const { title, type, event_date, event_time, location, description, status } = eventData;
+  
+  return await prisma.event.update({
+    where: { event_id: eventId },
+    data: {
+      title,
+      type,
+      event_date,
+      event_time,
+      location,
+      description,
+      status
+    }
+  });
+}
+
+export async function deleteEvent(eventId) {
+  return await prisma.event.delete({
+    where: { event_id: eventId }
+  });
+}
+
 // Middleware for role-based access
 export function requireRole(roles) {
   return (handler) => {

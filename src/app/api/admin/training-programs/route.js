@@ -72,7 +72,7 @@ export async function GET(req) {
       { status: 500 }
     );
   }
-});
+}
 
 // POST /api/admin/training-programs - Create new training program
 export async function POST(req) {

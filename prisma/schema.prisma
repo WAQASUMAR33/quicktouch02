@@ -140,8 +140,10 @@ model Event {
   title       String    @db.VarChar(150)
   type        EventType
   event_date  DateTime
+  event_time  String?   @db.VarChar(20)
   location    String?   @db.VarChar(150)
   description String?   @db.Text
+  status      EventStatus @default(Pending)
   created_by  Int
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
@@ -262,8 +264,14 @@ enum PreferredFoot {
 enum EventType {
   training
   match
-  trial
-  showcase
+  Trial
+  Showcase
+  GuestSessions
+}
+
+enum EventStatus {
+  Pending
+  Complete
 }
 
 enum TrainingType {

@@ -52,7 +52,7 @@ export async function GET(req) {
       { status: 500 }
     );
   }
-});
+}
 
 // POST /api/coach/training-plans - Create new training plan
 export async function POST(req) {
