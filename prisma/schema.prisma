@@ -50,6 +50,7 @@ model PlayerProfile {
   user               User                @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   player_stats       PlayerStat[]
   highlight_videos   HighlightVideo[]
+  player_reels       PlayerReel[]
   coach_feedback     CoachFeedback[]
   scout_favorites    ScoutFavorite[]
   attendance_records Attendance[]
@@ -87,6 +88,22 @@ model HighlightVideo {
   player PlayerProfile @relation(fields: [player_id], references: [player_id], onDelete: Cascade)
 
   @@map("HighlightVideos")
+}
+
+model PlayerReel {
+  reel_id       Int      @id @default(autoincrement())
+  player_id     Int
+  academy_id    Int
+  video_url     String   @db.VarChar(255)
+  title         String   @db.VarChar(150)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relations
+  player  PlayerProfile @relation(fields: [player_id], references: [player_id], onDelete: Cascade)
+  academy Academy       @relation(fields: [academy_id], references: [academy_id], onDelete: Cascade)
+
+  @@map("PlayerReels")
 }
 
 model CoachFeedback {
@@ -242,6 +259,7 @@ model Academy {
   // Relations
   users           User[]
   training_plans  TrainingPlan[]
+  player_reels    PlayerReel[]
 
   @@map("Academies")
 }

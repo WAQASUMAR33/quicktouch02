@@ -396,6 +396,179 @@ export async function deleteEvent(eventId) {
   });
 }
 
+// Player Profile functions
+export async function updatePlayerProfile(playerId, profileData) {
+  const { age, height_cm, position, weight_kg, preferred_foot } = profileData;
+  
+  return await prisma.playerProfile.update({
+    where: { player_id: playerId },
+    data: {
+      age,
+      height_cm,
+      position,
+      weight_kg,
+      preferred_foot
+    }
+  });
+}
+
+export async function getPlayerProfile(playerId) {
+  return await prisma.playerProfile.findUnique({
+    where: { player_id: playerId },
+    include: {
+      user: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true,
+          phone: true,
+          profile_pic: true
+        }
+      }
+    }
+  });
+}
+
+export async function getPlayerProfileByUserId(userId) {
+  return await prisma.playerProfile.findUnique({
+    where: { user_id: userId },
+    include: {
+      user: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true,
+          phone: true,
+          profile_pic: true
+        }
+      }
+    }
+  });
+}
+
+// Player Reel functions
+export async function createPlayerReel(reelData) {
+  const { player_id, academy_id, video_url, title } = reelData;
+  
+  return await prisma.playerReel.create({
+    data: {
+      player_id,
+      academy_id,
+      video_url,
+      title
+    }
+  });
+}
+
+export async function getPlayerReelById(reelId) {
+  return await prisma.playerReel.findUnique({
+    where: { reel_id: reelId },
+    include: {
+      player: {
+        include: {
+          user: {
+            select: {
+              user_id: true,
+              full_name: true,
+              email: true,
+              profile_pic: true
+            }
+          }
+        }
+      },
+      academy: {
+        select: {
+          academy_id: true,
+          name: true,
+          logo_url: true
+        }
+      }
+    }
+  });
+}
+
+export async function getPlayerReelsByPlayer(playerId) {
+  return await prisma.playerReel.findMany({
+    where: { player_id: playerId },
+    include: {
+      academy: {
+        select: {
+          academy_id: true,
+          name: true,
+          logo_url: true
+        }
+      }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function getPlayerReelsByAcademy(academyId) {
+  return await prisma.playerReel.findMany({
+    where: { academy_id: academyId },
+    include: {
+      player: {
+        include: {
+          user: {
+            select: {
+              user_id: true,
+              full_name: true,
+              email: true,
+              profile_pic: true
+            }
+          }
+        }
+      }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function getAllPlayerReels() {
+  return await prisma.playerReel.findMany({
+    include: {
+      player: {
+        include: {
+          user: {
+            select: {
+              user_id: true,
+              full_name: true,
+              email: true,
+              profile_pic: true
+            }
+          }
+        }
+      },
+      academy: {
+        select: {
+          academy_id: true,
+          name: true,
+          logo_url: true
+        }
+      }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function updatePlayerReel(reelId, reelData) {
+  const { video_url, title } = reelData;
+  
+  return await prisma.playerReel.update({
+    where: { reel_id: reelId },
+    data: {
+      video_url,
+      title
+    }
+  });
+}
+
+export async function deletePlayerReel(reelId) {
+  return await prisma.playerReel.delete({
+    where: { reel_id: reelId }
+  });
+}
+
 // Middleware for role-based access
 export function requireRole(roles) {
   return (handler) => {
