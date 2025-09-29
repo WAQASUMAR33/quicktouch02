@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AcademyDashboard() {
@@ -15,29 +15,7 @@ export default function AcademyDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    // Check authentication
-    const token = localStorage.getItem('academy_token');
-    const userData = localStorage.getItem('academy_user');
-    
-    if (!token || !userData) {
-      router.push('/academy/login');
-      return;
-    }
-
-    const parsedUser = JSON.parse(userData);
-    const allowedRoles = ['coach', 'player', 'scout'];
-    
-    if (!allowedRoles.includes(parsedUser.role)) {
-      router.push('/academy/login');
-      return;
-    }
-
-    setUser(parsedUser);
-    loadDashboardData();
-  }, [router]);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -65,7 +43,29 @@ export default function AcademyDashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.role]);
+
+  useEffect(() => {
+    // Check authentication
+    const token = localStorage.getItem('academy_token');
+    const userData = localStorage.getItem('academy_user');
+    
+    if (!token || !userData) {
+      router.push('/academy/login');
+      return;
+    }
+
+    const parsedUser = JSON.parse(userData);
+    const allowedRoles = ['coach', 'player', 'scout'];
+    
+    if (!allowedRoles.includes(parsedUser.role)) {
+      router.push('/academy/login');
+      return;
+    }
+
+    setUser(parsedUser);
+    loadDashboardData();
+  }, [router, loadDashboardData]);
 
   const handleLogout = () => {
     localStorage.removeItem('academy_token');
@@ -143,7 +143,7 @@ export default function AcademyDashboard() {
             Welcome back, {user?.full_name}!
           </h2>
           <p className="text-gray-600 mt-1">
-            Here's what's happening in your academy today.
+            Here&apos;s what&apos;s happening in your academy today.
           </p>
         </div>
 
