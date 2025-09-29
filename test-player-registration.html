@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Registration API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚽ Player Registration API Test</h1>
+        
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="full_name">Full Name *</label>
+                <input type="text" id="full_name" name="full_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" name="password" required minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="academy_id">Academy</label>
+                <select id="academy_id" name="academy_id">
+                    <option value="">Select Academy (Optional)</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" name="age" min="5" max="50">
+                </div>
+                <div class="form-group">
+                    <label for="height_cm">Height (cm)</label>
+                    <input type="number" id="height_cm" name="height_cm" min="100" max="250">
+                </div>
+                <div class="form-group">
+                    <label for="weight_kg">Weight (kg)</label>
+                    <input type="number" id="weight_kg" name="weight_kg" min="20" max="150">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="position">Position</label>
+                    <select id="position" name="position">
+                        <option value="">Select Position</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="preferred_foot">Preferred Foot</label>
+                    <select id="preferred_foot" name="preferred_foot">
+                        <option value="">Select Preferred Foot</option>
+                        <option value="Left">Left</option>
+                        <option value="Right">Right</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit">Register Player</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Load form data on page load
+        async function loadFormData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/players/register`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Populate academies
+                    const academySelect = document.getElementById('academy_id');
+                    data.academies.forEach(academy => {
+                        const option = document.createElement('option');
+                        option.value = academy.academy_id;
+                        option.textContent = `${academy.name} - ${academy.address}`;
+                        academySelect.appendChild(option);
+                    });
+                    
+                    // Populate positions
+                    const positionSelect = document.getElementById('position');
+                    data.positions.forEach(position => {
+                        const option = document.createElement('option');
+                        option.value = position;
+                        option.textContent = position;
+                        positionSelect.appendChild(option);
+                    });
+                    
+                    showResult('Form data loaded successfully!', 'info');
+                } else {
+                    showResult(`Failed to load form data: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`Error loading form data: ${error.message}`, 'error');
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const playerData = Object.fromEntries(formData.entries());
+            
+            // Convert numeric fields
+            if (playerData.age) playerData.age = parseInt(playerData.age);
+            if (playerData.height_cm) playerData.height_cm = parseInt(playerData.height_cm);
+            if (playerData.weight_kg) playerData.weight_kg = parseInt(playerData.weight_kg);
+            if (playerData.academy_id) playerData.academy_id = parseInt(playerData.academy_id);
+            
+            // Remove empty fields
+            Object.keys(playerData).forEach(key => {
+                if (playerData[key] === '') {
+                    delete playerData[key];
+                }
+            });
+            
+            showResult('Registering player...', 'loading');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/players/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(playerData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ Player registered successfully!
+
+🆔 User ID: ${result.user.userId}
+🏷️ Player ID: ${result.playerProfile.playerId}
+📧 Email: ${result.user.email}
+👤 Full Name: ${result.user.fullName}
+🏢 Academy ID: ${result.user.academyId || 'None'}
+⚽ Position: ${result.playerProfile.position || 'Not specified'}
+🦶 Preferred Foot: ${result.playerProfile.preferredFoot || 'Not specified'}
+📏 Height: ${result.playerProfile.heightCm || 'Not specified'} cm
+⚖️ Weight: ${result.playerProfile.weightKg || 'Not specified'} kg
+🎂 Age: ${result.playerProfile.age || 'Not specified'}
+
+🎫 Token: ${result.token.substring(0, 50)}...`, 'success');
+                } else {
+                    showResult(`❌ Registration failed: ${result.error}
+
+${result.details ? `Details: ${result.details}` : ''}`, 'error');
+                }
+            } catch (error) {
+                showResult(`💥 Error: ${error.message}`, 'error');
+            }
+        });
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+        }
+
+        // Load form data when page loads
+        loadFormData();
+    </script>
+</body>
+</html>
