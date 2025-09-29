@@ -46,20 +46,8 @@ export default function AcademyLogin() {
           localStorage.setItem('academy_token', data.token);
           localStorage.setItem('academy_user', JSON.stringify(data.user));
           
-          // Redirect based on role
-          switch (data.user.role) {
-            case 'coach':
-              router.push('/academy/coach/dashboard');
-              break;
-            case 'player':
-              router.push('/academy/player/dashboard');
-              break;
-            case 'scout':
-              router.push('/academy/scout/dashboard');
-              break;
-            default:
-              router.push('/academy/dashboard');
-          }
+          // Redirect to main academy dashboard
+          router.push('/academy/dashboard');
         } else {
           setError('Access denied. Academy access required.');
         }
