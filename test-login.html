@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+        .user-info {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .user-info h3 {
+            margin-top: 0;
+            color: #0c5460;
+        }
+        .user-info p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Login API Test</h1>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password" minlength="6">
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="rememberMe" name="rememberMe">
+                <label for="rememberMe">Remember me for 30 days</label>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Load form data on page load
+        async function loadFormData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('Login form data loaded successfully!\n\nValidation Rules:\n' + 
+                        JSON.stringify(data.validationRules, null, 2) + 
+                        '\n\nFeatures:\n' + 
+                        JSON.stringify(data.features, null, 2) + 
+                        '\n\nSupported Roles: ' + data.supportedRoles.join(', '), 'info');
+                } else {
+                    showResult(`Failed to load form data: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`Error loading form data: ${error.message}`, 'error');
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const loginData = {
+                email: formData.get('email'),
+                password: formData.get('password'),
+                rememberMe: formData.get('rememberMe') === 'on'
+            };
+            
+            showResult('Logging in...', 'loading');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ Login successful!
+
+🎫 Token: ${result.token.substring(0, 50)}...
+⏰ Expires In: ${result.expiresIn}
+📝 Message: ${result.message}`, 'success');
+                    
+                    // Display user information
+                    displayUserInfo(result.user);
+                    
+                    // Store token in localStorage for future use
+                    localStorage.setItem('auth_token', result.token);
+                    localStorage.setItem('user_data', JSON.stringify(result.user));
+                    
+                } else {
+                    showResult(`❌ Login failed: ${result.error}
+
+${result.details ? `Details: ${result.details}` : ''}`, 'error');
+                }
+            } catch (error) {
+                showResult(`💥 Error: ${error.message}`, 'error');
+            }
+        });
+
+        function displayUserInfo(user) {
+            const userInfoDiv = document.createElement('div');
+            userInfoDiv.className = 'user-info';
+            userInfoDiv.innerHTML = `
+                <h3>👤 User Information</h3>
+                <p><strong>User ID:</strong> ${user.userId}</p>
+                <p><strong>Full Name:</strong> ${user.fullName}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Role:</strong> ${user.role}</p>
+                <p><strong>Phone:</strong> ${user.phone || 'Not provided'}</p>
+                <p><strong>Academy ID:</strong> ${user.academyId || 'None'}</p>
+                <p><strong>Academy Name:</strong> ${user.academy?.name || 'None'}</p>
+                <p><strong>Player Profile:</strong> ${user.playerProfile ? 'Available' : 'Not available'}</p>
+                <p><strong>Created:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
+            `;
+            
+            document.getElementById('result').appendChild(userInfoDiv);
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+        }
+
+        // Load form data when page loads
+        loadFormData();
+    </script>
+</body>
+</html>

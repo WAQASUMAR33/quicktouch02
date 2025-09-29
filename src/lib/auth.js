@@ -5,7 +5,7 @@ import prisma from './prisma.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Generate JWT token
-export function generateToken(user) {
+export function generateToken(user, expiresIn = '7d') {
   const payload = {
     userId: user.user_id,
     email: user.email,
@@ -13,7 +13,7 @@ export function generateToken(user) {
     fullName: user.full_name
   };
   
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn });
 }
 
 // Verify JWT token
