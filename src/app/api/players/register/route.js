@@ -106,7 +106,7 @@ export async function POST(request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
     
-    // Create user and player profile in a transaction
+    // Create user and player profile in a transaction with timeout
     const result = await prisma.$transaction(async (tx) => {
       // Create user
       const user = await tx.user.create({
@@ -133,6 +133,8 @@ export async function POST(request) {
       });
 
       return { user, playerProfile };
+    }, {
+      timeout: 10000, // 10 seconds timeout
     });
 
     // Generate JWT token
