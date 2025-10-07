@@ -10,6 +10,18 @@ export default function AcademyEvents() {
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterType, setFilterType] = useState('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [createSuccess, setCreateSuccess] = useState('');
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    type: 'training',
+    event_date: '',
+    location: '',
+    description: '',
+    created_by: null
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -62,6 +74,66 @@ export default function AcademyEvents() {
     } else {
       setFilteredEvents(events.filter(e => e.type === type));
     }
+  };
+
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setCreateError('');
+    setCreateSuccess('');
+
+    try {
+      const eventData = {
+        ...newEvent,
+        created_by: user.userId
+      };
+
+      const response = await fetch('/api/admin/events-simple', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCreateSuccess('Event created successfully!');
+        setNewEvent({
+          title: '',
+          type: 'training',
+          event_date: '',
+          location: '',
+          description: '',
+          created_by: null
+        });
+        
+        // Reload events
+        await loadEvents();
+        
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          setShowCreateModal(false);
+          setCreateSuccess('');
+        }, 2000);
+      } else {
+        setCreateError(data.error || 'Failed to create event');
+      }
+    } catch (error) {
+      console.error('Error creating event:', error);
+      setCreateError('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEvent(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleLogout = () => {
@@ -273,16 +345,26 @@ export default function AcademyEvents() {
 
         {/* Main Content */}
         <main className="p-6 lg:p-8">
-          {/* Header with Filters */}
+          {/* Header with Create Button */}
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-2">All Events</h3>
+              <p className="text-gray-400">Total: {filteredEvents.length} events</p>
+            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create New Event
+            </button>
+          </div>
+
+          {/* Filters */}
           <div className="mb-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-              <div>
-                <h3 className="text-2xl font-bold text-white mb-2">All Events</h3>
-                <p className="text-gray-400">Total: {filteredEvents.length} events</p>
-              </div>
-              
-              {/* Filter Buttons */}
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => handleFilterChange('all')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -421,6 +503,169 @@ export default function AcademyEvents() {
           )}
         </main>
       </div>
+
+      {/* Create Event Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            {/* Background overlay */}
+            <div
+              className="fixed inset-0 transition-opacity bg-black/70 backdrop-blur-sm"
+              onClick={() => setShowCreateModal(false)}
+            ></div>
+
+            {/* Modal panel */}
+            <div className="inline-block align-bottom bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-700">
+              {/* Modal Header */}
+              <div className="bg-gray-800/50 px-6 py-4 border-b border-gray-700">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-white">Create New Event</h3>
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <form onSubmit={handleCreateEvent} className="px-6 py-6">
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-200 mb-2">
+                      Event Title *
+                    </label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      required
+                      value={newEvent.title}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                      placeholder="Enter event title"
+                    />
+                  </div>
+
+                  {/* Type */}
+                  <div>
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-200 mb-2">
+                      Event Type *
+                    </label>
+                    <select
+                      id="type"
+                      name="type"
+                      required
+                      value={newEvent.type}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    >
+                      <option value="training">Training</option>
+                      <option value="match">Match</option>
+                      <option value="trial">Trial</option>
+                      <option value="showcase">Showcase</option>
+                    </select>
+                  </div>
+
+                  {/* Date */}
+                  <div>
+                    <label htmlFor="event_date" className="block text-sm font-medium text-gray-200 mb-2">
+                      Event Date *
+                    </label>
+                    <input
+                      type="datetime-local"
+                      id="event_date"
+                      name="event_date"
+                      required
+                      value={newEvent.event_date}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-200 mb-2">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      id="location"
+                      name="location"
+                      value={newEvent.location}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                      placeholder="Enter location"
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      rows="3"
+                      value={newEvent.description}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                      placeholder="Enter event description"
+                    ></textarea>
+                  </div>
+
+                  {/* Success Message */}
+                  {createSuccess && (
+                    <div className="bg-green-900/30 border border-green-500/50 rounded-xl p-4">
+                      <div className="flex items-center">
+                        <svg className="h-5 w-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-green-200 text-sm font-medium">{createSuccess}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error Message */}
+                  {createError && (
+                    <div className="bg-red-900/30 border border-red-500/50 rounded-xl p-4">
+                      <div className="flex items-center">
+                        <svg className="h-5 w-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-red-200 text-sm font-medium">{createError}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="mt-6 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Creating...' : 'Create Event'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
