@@ -841,17 +841,18 @@ export default function AcademyEvents() {
                   </div>
                 </div>
               </div>
-
-              {/* Modal Footer */}
-              <div className="px-6 py-4 bg-gray-900/30 border-t border-gray-700">
-                <button
-                  onClick={handleCloseDetails}
-                  className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors duration-200"
-                >
-                  Close
-                </button>
-              </div>
             </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-gray-900/30 border-t border-gray-700">
+              <button
+                onClick={handleCloseDetails}
+                className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
