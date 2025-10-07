@@ -75,7 +75,9 @@ export async function updateUser(userId, userData) {
 // Middleware for protecting routes
 export function requireAuth(handler) {
   return async (req) => {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    // Support both req.headers.get() (App Router) and req.headers.authorization (Pages Router)
+    const authHeader = req.headers.get ? req.headers.get('authorization') : req.headers.authorization;
+    const token = authHeader?.replace('Bearer ', '');
     
     if (!token) {
       return NextResponse.json({ error: 'No token provided' }, { status: 401 });

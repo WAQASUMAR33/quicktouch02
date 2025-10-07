@@ -1,37 +1,12 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { requireAuth } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 // POST /api/auth/change-password - Change user password
-export async function POST(request) {
+export const POST = requireAuth(async (req) => {
   try {
-    const { currentPassword, newPassword } = await request.json();
-    
-    // Get token from header
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No token provided' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.substring(7);
-    
-    // Verify token
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    const { currentPassword, newPassword } = await req.json();
 
     // Validate required fields
     if (!currentPassword || !newPassword) {
@@ -49,9 +24,9 @@ export async function POST(request) {
       );
     }
 
-    // Get user from database
+    // Get user from database using the authenticated user ID from requireAuth middleware
     const user = await prisma.user.findUnique({
-      where: { user_id: decoded.userId }
+      where: { user_id: req.user.userId }
     });
 
     if (!user) {
@@ -104,5 +79,5 @@ export async function POST(request) {
       { status: 500 }
     );
   }
-}
+});
 
