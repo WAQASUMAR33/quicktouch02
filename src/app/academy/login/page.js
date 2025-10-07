@@ -39,8 +39,8 @@ export default function AcademyLogin() {
       const data = await response.json();
 
       if (response.ok) {
-        // Check if user is academy-related (coach, player, scout)
-        const allowedRoles = ['coach', 'player', 'scout'];
+        // Check if user has valid role (admin, coach, player, scout)
+        const allowedRoles = ['admin', 'coach', 'player', 'scout'];
         if (allowedRoles.includes(data.user.role)) {
           // Store token and user data
           localStorage.setItem('academy_token', data.token);
@@ -49,7 +49,7 @@ export default function AcademyLogin() {
           // Redirect to main academy dashboard
           router.push('/academy/dashboard');
         } else {
-          setError('Access denied. Academy access required.');
+          setError('Access denied. Invalid user role.');
         }
       } else {
         setError(data.error || 'Login failed. Please try again.');

@@ -152,6 +152,7 @@ export default function AcademySignup() {
                 <option value="player">Player</option>
                 <option value="coach">Coach</option>
                 <option value="scout">Scout</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
 
