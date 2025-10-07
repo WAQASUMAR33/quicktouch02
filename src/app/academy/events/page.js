@@ -11,6 +11,8 @@ export default function AcademyEvents() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterType, setFilterType] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createError, setCreateError] = useState('');
   const [createSuccess, setCreateSuccess] = useState('');
@@ -148,6 +150,16 @@ export default function AcademyEvents() {
       description: '',
       created_by: null
     });
+  };
+
+  const handleViewDetails = (event) => {
+    setSelectedEvent(event);
+    setShowDetailsModal(true);
+  };
+
+  const handleCloseDetails = () => {
+    setShowDetailsModal(false);
+    setSelectedEvent(null);
   };
 
   const handleLogout = () => {
@@ -493,7 +505,10 @@ export default function AcademyEvents() {
                   )}
 
                   {/* View Details Button */}
-                  <button className="mt-4 w-full px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-lg transition-colors duration-200">
+                  <button 
+                    onClick={() => handleViewDetails(event)}
+                    className="mt-4 w-full px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-lg transition-colors duration-200"
+                  >
                     View Details
                   </button>
                 </div>
@@ -683,6 +698,159 @@ export default function AcademyEvents() {
                   </button>
                 </div>
               </form>
+            </div>
+        </div>
+      )}
+
+      {/* View Event Details Modal */}
+      {showDetailsModal && selectedEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Background overlay */}
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={handleCloseDetails}
+          ></div>
+
+          {/* Modal panel */}
+          <div className="relative bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="bg-gray-800/50 px-6 py-4 border-b border-gray-700 sticky top-0 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${
+                    selectedEvent.type === 'training' ? 'bg-blue-600' :
+                    selectedEvent.type === 'match' ? 'bg-green-600' :
+                    'bg-purple-600'
+                  }`}>
+                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Event Details</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCloseDetails}
+                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-6">
+              <div className="space-y-6">
+                {/* Event Title */}
+                <div>
+                  <h2 className="text-3xl font-bold text-white mb-2">{selectedEvent.title}</h2>
+                  <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
+                    selectedEvent.type === 'training' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                    selectedEvent.type === 'match' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                    'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                  }`}>
+                    {selectedEvent.type.toUpperCase()}
+                  </span>
+                </div>
+
+                {/* Event Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Date & Time */}
+                  <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-yellow-500/20 rounded-lg">
+                        <svg className="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Date & Time</p>
+                        <p className="text-sm font-semibold text-white">
+                          {new Date(selectedEvent.event_date).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {new Date(selectedEvent.event_date).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-yellow-500/20 rounded-lg">
+                        <svg className="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Location</p>
+                        <p className="text-sm font-semibold text-white">
+                          {selectedEvent.location || 'Not specified'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {selectedEvent.description && (
+                  <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-yellow-500/20 rounded-lg">
+                        <svg className="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-400 mb-2">Description</p>
+                        <p className="text-sm text-gray-300 leading-relaxed">
+                          {selectedEvent.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Event Metadata */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                    <p className="text-xs text-gray-400 mb-1">Event ID</p>
+                    <p className="text-sm font-semibold text-white">#{selectedEvent.event_id}</p>
+                  </div>
+                  <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                    <p className="text-xs text-gray-400 mb-1">Created</p>
+                    <p className="text-sm font-semibold text-white">
+                      {new Date(selectedEvent.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="px-6 py-4 bg-gray-900/30 border-t border-gray-700">
+                <button
+                  onClick={handleCloseDetails}
+                  className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors duration-200"
+                >
+                  Close
+                </button>
+              </div>
             </div>
         </div>
       )}
