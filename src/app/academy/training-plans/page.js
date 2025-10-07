@@ -27,8 +27,7 @@ export default function TrainingPlans() {
     program_date: '',
     program_time: '',
     details: '',
-    status: 'upcoming',
-    video_url: ''
+    status: 'upcoming'
   });
   const [editPlan, setEditPlan] = useState({
     title: '',
@@ -37,8 +36,7 @@ export default function TrainingPlans() {
     program_date: '',
     program_time: '',
     details: '',
-    status: 'upcoming',
-    video_url: ''
+    status: 'upcoming'
   });
   const router = useRouter();
 
@@ -126,8 +124,7 @@ export default function TrainingPlans() {
           program_date: '',
           program_time: '',
           details: '',
-          status: 'upcoming',
-          video_url: ''
+          status: 'upcoming'
         });
         
         await loadTrainingPlans();
@@ -159,6 +156,15 @@ export default function TrainingPlans() {
     setShowCreateModal(false);
     setCreateError('');
     setCreateSuccess('');
+    setNewPlan({
+      title: '',
+      title_type: 'TrainingProgram',
+      venue: '',
+      program_date: '',
+      program_time: '',
+      details: '',
+      status: 'upcoming'
+    });
   };
 
   const handleViewDetails = (plan) => {
@@ -536,13 +542,6 @@ export default function TrainingPlans() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-200 mb-2">Video URL</label>
-                  <input type="url" name="video_url" value={newPlan.video_url} onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    placeholder="https://youtube.com/..." />
-                </div>
-
-                <div>
                   <label className="block text-sm font-medium text-gray-200 mb-2">Status</label>
                   <select name="status" value={newPlan.status} onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
@@ -659,16 +658,6 @@ export default function TrainingPlans() {
                   <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
                     <p className="text-xs text-gray-400 mb-2">Details</p>
                     <p className="text-sm text-gray-300 leading-relaxed">{selectedPlan.details}</p>
-                  </div>
-                )}
-
-                {selectedPlan.video_url && (
-                  <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
-                    <p className="text-xs text-gray-400 mb-2">Video</p>
-                    <a href={selectedPlan.video_url} target="_blank" rel="noopener noreferrer"
-                      className="text-sm text-yellow-400 hover:text-yellow-300 underline break-all">
-                      {selectedPlan.video_url}
-                    </a>
                   </div>
                 )}
               </div>
