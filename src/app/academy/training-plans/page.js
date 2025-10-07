@@ -177,6 +177,94 @@ export default function TrainingPlans() {
     setSelectedPlan(null);
   };
 
+  const handleEditClick = (plan) => {
+    setSelectedPlan(plan);
+    setEditPlan({
+      title: plan.title,
+      title_type: plan.title_type,
+      venue: plan.venue || '',
+      program_date: plan.program_date ? new Date(plan.program_date).toISOString().split('T')[0] : '',
+      program_time: plan.program_time || '',
+      details: plan.details || '',
+      status: plan.status
+    });
+    setShowDetailsModal(false);
+    setShowEditModal(true);
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditPlan(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleUpdatePlan = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setEditError('');
+    setEditSuccess('');
+
+    try {
+      const response = await fetch(`/api/coach/training-plans/${selectedPlan.plan_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editPlan),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setEditSuccess('Training plan updated successfully!');
+        await loadTrainingPlans();
+        
+        setTimeout(() => {
+          setShowEditModal(false);
+          setEditSuccess('');
+          setSelectedPlan(null);
+        }, 2000);
+      } else {
+        setEditError(data.error || 'Failed to update training plan');
+      }
+    } catch (error) {
+      console.error('Error updating training plan:', error);
+      setEditError('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeletePlan = async () => {
+    if (!confirm('Are you sure you want to delete this training plan? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/coach/training-plans/${selectedPlan.plan_id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await loadTrainingPlans();
+        setShowDetailsModal(false);
+        setSelectedPlan(null);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to delete training plan');
+      }
+    } catch (error) {
+      console.error('Error deleting training plan:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('academy_token');
     localStorage.removeItem('academy_user');
@@ -664,11 +752,159 @@ export default function TrainingPlans() {
             </div>
 
             <div className="px-6 py-4 bg-gray-900/30 border-t border-gray-700">
-              <button onClick={handleCloseDetails}
-                className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors duration-200">
-                Close
-              </button>
+              <div className="flex gap-3">
+                <button onClick={handleCloseDetails}
+                  className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors duration-200">
+                  Close
+                </button>
+                <button onClick={() => handleEditClick(selectedPlan)}
+                  className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-xl transition-colors duration-200 flex items-center justify-center">
+                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit
+                </button>
+                <button onClick={handleDeletePlan} disabled={isDeleting}
+                  className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                  {isDeleting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Delete
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Plan Modal */}
+      {showEditModal && selectedPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
+
+          <div className="relative bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+            <div className="bg-gray-800/50 px-6 py-4 border-b border-gray-700 sticky top-0 z-10">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white">Edit Training Plan</h3>
+                <button type="button" onClick={() => setShowEditModal(false)}
+                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleUpdatePlan} className="px-6 py-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Title *</label>
+                  <input type="text" name="title" required value={editPlan.title} onChange={handleEditInputChange}
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    placeholder="Enter plan title" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Type *</label>
+                  <select name="title_type" required value={editPlan.title_type} onChange={handleEditInputChange}
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    <option value="TrainingProgram">Training Program</option>
+                    <option value="Match">Match</option>
+                    <option value="Drill">Drill</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Date</label>
+                  <input type="date" name="program_date" value={editPlan.program_date} onChange={handleEditInputChange}
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Time</label>
+                  <input type="time" name="program_time" value={editPlan.program_time} onChange={handleEditInputChange}
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Venue</label>
+                  <input type="text" name="venue" value={editPlan.venue} onChange={handleEditInputChange}
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    placeholder="Enter venue" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Details</label>
+                  <textarea name="details" rows="3" value={editPlan.details} onChange={handleEditInputChange}
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                    placeholder="Enter training details"></textarea>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Status</label>
+                  <select name="status" value={editPlan.status} onChange={handleEditInputChange}
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    <option value="upcoming">Upcoming</option>
+                    <option value="Complete">Complete</option>
+                  </select>
+                </div>
+
+                {editSuccess && (
+                  <div className="bg-green-900/30 border border-green-500/50 rounded-xl p-4">
+                    <div className="flex items-center">
+                      <svg className="h-5 w-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-green-200 text-sm font-medium">{editSuccess}</p>
+                    </div>
+                  </div>
+                )}
+
+                {editError && (
+                  <div className="bg-red-900/30 border border-red-500/50 rounded-xl p-4">
+                    <div className="flex items-center">
+                      <svg className="h-5 w-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-red-200 text-sm font-medium">{editError}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button type="button" onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors duration-200">
+                  Cancel
+                </button>
+                <button type="submit" disabled={isSubmitting}
+                  className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-900" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Plan'
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
