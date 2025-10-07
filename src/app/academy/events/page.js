@@ -363,60 +363,57 @@ export default function AcademyEvents() {
           </div>
 
           {/* Filters */}
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => handleFilterChange('all')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    filterType === 'all'
-                      ? 'bg-yellow-500 text-gray-900'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => handleFilterChange('upcoming')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    filterType === 'upcoming'
-                      ? 'bg-yellow-500 text-gray-900'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  Upcoming
-                </button>
-                <button
-                  onClick={() => handleFilterChange('past')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    filterType === 'past'
-                      ? 'bg-yellow-500 text-gray-900'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  Past
-                </button>
-                <button
-                  onClick={() => handleFilterChange('training')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    filterType === 'training'
-                      ? 'bg-yellow-500 text-gray-900'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  Training
-                </button>
-                <button
-                  onClick={() => handleFilterChange('match')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    filterType === 'match'
-                      ? 'bg-yellow-500 text-gray-900'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  Match
-                </button>
-              </div>
-            </div>
+          <div className="mb-8 flex flex-wrap gap-2">
+            <button
+              onClick={() => handleFilterChange('all')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                filterType === 'all'
+                  ? 'bg-yellow-500 text-gray-900'
+                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => handleFilterChange('upcoming')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                filterType === 'upcoming'
+                  ? 'bg-yellow-500 text-gray-900'
+                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Upcoming
+            </button>
+            <button
+              onClick={() => handleFilterChange('past')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                filterType === 'past'
+                  ? 'bg-yellow-500 text-gray-900'
+                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Past
+            </button>
+            <button
+              onClick={() => handleFilterChange('training')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                filterType === 'training'
+                  ? 'bg-yellow-500 text-gray-900'
+                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Training
+            </button>
+            <button
+              onClick={() => handleFilterChange('match')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                filterType === 'match'
+                  ? 'bg-yellow-500 text-gray-900'
+                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Match
+            </button>
           </div>
 
           {/* Events Grid */}
