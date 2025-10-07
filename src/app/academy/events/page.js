@@ -136,6 +136,20 @@ export default function AcademyEvents() {
     }));
   };
 
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setCreateError('');
+    setCreateSuccess('');
+    setNewEvent({
+      title: '',
+      type: 'training',
+      event_date: '',
+      location: '',
+      description: '',
+      created_by: null
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('academy_token');
     localStorage.removeItem('academy_user');
@@ -503,22 +517,22 @@ export default function AcademyEvents() {
 
       {/* Create Event Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            {/* Background overlay */}
-            <div
-              className="fixed inset-0 transition-opacity bg-black/70 backdrop-blur-sm"
-              onClick={() => setShowCreateModal(false)}
-            ></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Background overlay */}
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={handleCloseModal}
+          ></div>
 
-            {/* Modal panel */}
-            <div className="inline-block align-bottom bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-700">
+          {/* Modal panel */}
+          <div className="relative bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
               {/* Modal Header */}
-              <div className="bg-gray-800/50 px-6 py-4 border-b border-gray-700">
+              <div className="bg-gray-800/50 px-6 py-4 border-b border-gray-700 sticky top-0 z-10">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold text-white">Create New Event</h3>
                   <button
-                    onClick={() => setShowCreateModal(false)}
+                    type="button"
+                    onClick={handleCloseModal}
                     className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200"
                   >
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -645,7 +659,7 @@ export default function AcademyEvents() {
                 <div className="mt-6 flex gap-3">
                   <button
                     type="button"
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={handleCloseModal}
                     className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors duration-200"
                   >
                     Cancel
@@ -653,14 +667,23 @@ export default function AcademyEvents() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    {isSubmitting ? 'Creating...' : 'Create Event'}
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-900" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Event'
+                    )}
                   </button>
                 </div>
               </form>
             </div>
-          </div>
         </div>
       )}
     </div>
