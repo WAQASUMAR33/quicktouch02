@@ -35,8 +35,13 @@ export default function AcademyDashboard() {
     }
 
     setUser(parsedUser);
-    loadDashboardData();
   }, [router]);
+
+  useEffect(() => {
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
 
   const loadDashboardData = async () => {
     try {
@@ -54,12 +59,35 @@ export default function AcademyDashboard() {
         }));
       }
 
-      // Mock data for other stats
-      setStats(prev => ({
-        ...prev,
-        totalPlayers: 25,
-        myActivities: 12
-      }));
+      // Load real players data
+      const playersResponse = await fetch('/api/players');
+      if (playersResponse.ok) {
+        const playersData = await playersResponse.json();
+        const totalPlayers = playersData.players?.length || 0;
+        setStats(prev => ({
+          ...prev,
+          totalPlayers: totalPlayers
+        }));
+      }
+
+      // Load training plans data (for coaches)
+      if (user?.role === 'coach') {
+        const plansResponse = await fetch('/api/coach/training-plans');
+        if (plansResponse.ok) {
+          const plansData = await plansResponse.json();
+          const myActivities = plansData.training_plans?.length || 0;
+          setStats(prev => ({
+            ...prev,
+            myActivities: myActivities
+          }));
+        }
+      } else {
+        // For players and scouts, use events count as activities
+        setStats(prev => ({
+          ...prev,
+          myActivities: prev.upcomingEvents
+        }));
+      }
 
     } catch (error) {
       console.error('Error loading dashboard data:', error);
