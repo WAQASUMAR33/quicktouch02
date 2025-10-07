@@ -116,18 +116,9 @@ export default function AcademyLogin() {
 
             {/* Password Field */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-200">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => router.push('/academy/forgot-password')}
-                  className="text-sm font-medium text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
-                >
-                  Forgot password?
-                </button>
-              </div>
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-200 mb-2">
+                Password
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,6 +136,15 @@ export default function AcademyLogin() {
                   className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
                   placeholder="Enter your password"
                 />
+              </div>
+              <div className="mt-2 text-right">
+                <button
+                  type="button"
+                  onClick={() => router.push('/academy/forgot-password')}
+                  className="text-sm font-medium text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
+                >
+                  Forgot password?
+                </button>
               </div>
             </div>
 
