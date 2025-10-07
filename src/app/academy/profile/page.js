@@ -77,9 +77,45 @@ export default function Profile() {
           position: data.user.player_profile?.position || '',
           preferred_foot: data.user.player_profile?.preferred_foot || ''
         });
+      } else {
+        // Fallback to using data from localStorage if API fails
+        console.warn('Profile API failed, using localStorage data');
+        const fallbackData = {
+          user_id: userData.userId,
+          full_name: userData.fullName,
+          email: userData.email,
+          phone: userData.phone || '',
+          role: userData.role,
+          created_at: new Date().toISOString(),
+          player_profile: userData.playerProfile || null
+        };
+        setProfileData(fallbackData);
+        setEditData({
+          full_name: fallbackData.full_name || '',
+          phone: fallbackData.phone || '',
+          age: fallbackData.player_profile?.age || '',
+          height_cm: fallbackData.player_profile?.heightCm || '',
+          weight_kg: fallbackData.player_profile?.weightKg || '',
+          position: fallbackData.player_profile?.position || '',
+          preferred_foot: fallbackData.player_profile?.preferredFoot || ''
+        });
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+      // Use localStorage data as last resort
+      const fallbackData = {
+        user_id: userData.userId,
+        full_name: userData.fullName,
+        email: userData.email,
+        phone: userData.phone || '',
+        role: userData.role,
+        created_at: new Date().toISOString()
+      };
+      setProfileData(fallbackData);
+      setEditData({
+        full_name: fallbackData.full_name || '',
+        phone: fallbackData.phone || ''
+      });
     } finally {
       setIsLoading(false);
     }
