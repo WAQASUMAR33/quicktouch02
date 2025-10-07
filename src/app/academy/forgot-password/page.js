@@ -3,59 +3,38 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function AcademyLogin() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+export default function ForgotPassword() {
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user starts typing
-    if (error) setError('');
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setMessage('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Check if user is academy-related (coach, player, scout)
-        const allowedRoles = ['coach', 'player', 'scout'];
-        if (allowedRoles.includes(data.user.role)) {
-          // Store token and user data
-          localStorage.setItem('academy_token', data.token);
-          localStorage.setItem('academy_user', JSON.stringify(data.user));
-          
-          // Redirect to main academy dashboard
-          router.push('/academy/dashboard');
-        } else {
-          setError('Access denied. Academy access required.');
-        }
+        setMessage(data.message || 'Password reset instructions have been sent to your email.');
+        setEmail('');
       } else {
-        setError(data.error || 'Login failed. Please try again.');
+        setError(data.error || 'Failed to send reset instructions. Please try again.');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Forgot password error:', error);
       setError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
@@ -73,20 +52,20 @@ export default function AcademyLogin() {
       <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300">
+          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center shadow-2xl">
             <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
             </svg>
           </div>
           <h2 className="mt-6 text-4xl font-bold text-white">
-            Academy Portal
+            Forgot Password
           </h2>
           <p className="mt-3 text-base text-gray-400">
-            Sign in to access your academy dashboard
+            Enter your email and we&apos;ll send you reset instructions
           </p>
         </div>
 
-        {/* Login Form */}
+        {/* Forgot Password Form */}
         <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-700/50">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email Field */}
@@ -106,47 +85,25 @@ export default function AcademyLogin() {
                   type="email"
                   autoComplete="email"
                   required
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
                   placeholder="your.email@academy.com"
                 />
               </div>
             </div>
 
-            {/* Password Field */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-200">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => router.push('/academy/forgot-password')}
-                  className="text-sm font-medium text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
-                >
-                  Forgot password?
-                </button>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            {/* Success Message */}
+            {message && (
+              <div className="bg-green-900/30 border border-green-500/50 rounded-xl p-4 backdrop-blur-sm">
+                <div className="flex items-center">
+                  <svg className="h-5 w-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
+                  <p className="text-green-200 text-sm font-medium">{message}</p>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your password"
-                />
               </div>
-            </div>
+            )}
 
             {/* Error Message */}
             {error && (
@@ -172,13 +129,13 @@ export default function AcademyLogin() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Signing in...
+                  Sending...
                 </div>
               ) : (
                 <>
-                  Sign In
+                  Send Reset Instructions
                   <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </>
               )}
@@ -187,12 +144,15 @@ export default function AcademyLogin() {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <div className="flex items-center justify-center text-xs text-gray-500">
-              <svg className="h-4 w-4 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              Secure academy access • All activities are monitored
-            </div>
+            <p className="text-sm text-gray-400">
+              Remember your password?{' '}
+              <button
+                onClick={() => router.push('/academy/login')}
+                className="text-yellow-500 hover:text-yellow-400 font-medium transition-colors duration-200"
+              >
+                Back to Login
+              </button>
+            </p>
           </div>
         </div>
 
@@ -212,3 +172,4 @@ export default function AcademyLogin() {
     </div>
   );
 }
+
