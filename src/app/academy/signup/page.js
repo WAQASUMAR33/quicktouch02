@@ -67,15 +67,11 @@ export default function AcademySignup() {
       const data = await response.json();
 
       if (response.ok) {
-        // Store token and academy data
-        localStorage.setItem('academy_token', data.token);
-        localStorage.setItem('academy_data', JSON.stringify(data.academy));
+        // Don't auto-login, redirect to login page instead
+        alert('✅ Academy registered successfully!\n\n📧 Please check your email to verify your account.\n\n🔐 You can now login at the academy login page.');
         
-        // Show success message about email verification
-        alert('Academy registered successfully! Please check your email to verify your account.');
-        
-        // Redirect to dashboard
-        router.push('/academy/dashboard');
+        // Redirect to login page
+        router.push('/academy/login');
       } else {
         setError(data.error || 'Registration failed. Please try again.');
       }

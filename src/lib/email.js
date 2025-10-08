@@ -2,6 +2,30 @@ import nodemailer from 'nodemailer';
 
 // Create reusable transporter
 const createTransporter = () => {
+  // Validate required environment variables
+  const requiredVars = {
+    EMAIL_SERVER_HOST: process.env.EMAIL_SERVER_HOST,
+    EMAIL_SERVER_PORT: process.env.EMAIL_SERVER_PORT,
+    EMAIL_SERVER_USER: process.env.EMAIL_SERVER_USER,
+    EMAIL_SERVER_PASSWORD: process.env.EMAIL_SERVER_PASSWORD,
+    EMAIL_FROM: process.env.EMAIL_FROM
+  };
+
+  const missing = Object.entries(requiredVars)
+    .filter(([key, value]) => !value)
+    .map(([key]) => key);
+
+  if (missing.length > 0) {
+    console.error('❌ Missing email configuration:', missing.join(', '));
+    throw new Error(`Missing email configuration: ${missing.join(', ')}`);
+  }
+
+  console.log('📧 Email Configuration:');
+  console.log('  Host:', process.env.EMAIL_SERVER_HOST);
+  console.log('  Port:', process.env.EMAIL_SERVER_PORT);
+  console.log('  User:', process.env.EMAIL_SERVER_USER);
+  console.log('  From:', process.env.EMAIL_FROM);
+
   return nodemailer.createTransporter({
     host: process.env.EMAIL_SERVER_HOST,
     port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
@@ -19,8 +43,13 @@ const createTransporter = () => {
 // Send email verification
 export async function sendVerificationEmail(to, name, verificationToken) {
   try {
+    console.log('📤 Sending verification email to:', to);
+    console.log('   Verification token:', verificationToken);
+    
     const transporter = createTransporter();
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/academy/verify-email?token=${verificationToken}`;
+    
+    console.log('   Verification URL:', verificationUrl);
     
     const mailOptions = {
       from: `"QuickTouch Academy" <${process.env.EMAIL_FROM}>`,
@@ -121,10 +150,15 @@ The QuickTouch Team
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Verification email sent:', info.messageId);
+    console.log('✅ Verification email sent successfully!');
+    console.log('   Message ID:', info.messageId);
+    console.log('   Response:', info.response);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error sending verification email:', error);
+    console.error('❌ Error sending verification email:', error);
+    console.error('   Error code:', error.code);
+    console.error('   Error message:', error.message);
+    if (error.response) console.error('   SMTP Response:', error.response);
     throw error;
   }
 }

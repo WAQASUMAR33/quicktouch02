@@ -101,11 +101,19 @@ export async function POST(req) {
 
     // Send verification email
     try {
-      await sendVerificationEmail(academy.email, academy.name, verificationToken);
-      console.log('Verification email sent successfully to:', academy.email);
+      console.log('🔄 Attempting to send verification email...');
+      console.log('   To:', academy.email);
+      console.log('   Academy:', academy.name);
+      
+      const emailResult = await sendVerificationEmail(academy.email, academy.name, verificationToken);
+      
+      console.log('✅ Verification email sent successfully!');
+      console.log('   Message ID:', emailResult.messageId);
     } catch (emailError) {
-      console.error('Failed to send verification email:', emailError);
+      console.error('❌ Failed to send verification email:', emailError.message);
+      console.error('   Full error:', emailError);
       // Don't fail registration if email fails, just log it
+      // The user can still login and resend verification later
     }
 
     return NextResponse.json({
