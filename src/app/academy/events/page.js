@@ -11,6 +11,7 @@ export default function AcademyEvents() {
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterType, setFilterType] = useState('all');
+  const [currentTime, setCurrentTime] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -51,6 +52,21 @@ export default function AcademyEvents() {
     loadEvents();
   }, [router]);
 
+  useEffect(() => {
+    // Set current time on client side only
+    const updateTime = () => {
+      setCurrentTime(new Date().toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }));
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const loadEvents = async () => {
     try {
       setIsLoading(true);
@@ -90,7 +106,7 @@ export default function AcademyEvents() {
     try {
       const eventData = {
         ...newEvent,
-        created_by: user.userId
+        created_by: user.academy_id || 1 // Use academy_id or fallback to 1
       };
 
       const response = await fetch('/api/admin/events-simple', {
@@ -395,16 +411,10 @@ export default function AcademyEvents() {
               {/* Right Side - Date/Time */}
               <div className="hidden md:block text-right">
                 <p className="text-sm font-medium text-white">
-                  {new Date().toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric' 
-                  })}
+                  {currentTime || 'Loading...'}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {new Date().toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
+                  Today
                 </p>
               </div>
             </div>
