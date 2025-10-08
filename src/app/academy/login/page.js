@@ -10,6 +10,9 @@ export default function AcademyLogin() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [verificationWarning, setVerificationWarning] = useState('');
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const router = useRouter();
 
   const handleInputChange = (e) => {
@@ -20,6 +23,35 @@ export default function AcademyLogin() {
     }));
     // Clear error when user starts typing
     if (error) setError('');
+  };
+
+  const handleResendVerification = async () => {
+    setIsResending(true);
+    setError('');
+    
+    try {
+      const response = await fetch('/api/auth/academy/resend-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setVerificationWarning('✅ Verification email sent! Please check your inbox.');
+        setShowResendVerification(false);
+      } else {
+        setError(data.error || 'Failed to resend verification email.');
+      }
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setIsResending(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -43,13 +75,18 @@ export default function AcademyLogin() {
         localStorage.setItem('academy_token', data.token);
         localStorage.setItem('academy_data', JSON.stringify(data.academy));
         
-        // Show warning if email not verified
+        // Check if email is verified
         if (!data.emailVerified) {
-          setError('Warning: Please verify your email address. Check your inbox or resend verification.');
+          setVerificationWarning('⚠️ Your email is not verified. Please check your inbox or resend verification email below.');
+          setShowResendVerification(true);
+          // Still redirect but show warning first
+          setTimeout(() => {
+            router.push('/academy/dashboard');
+          }, 4000); // 4 seconds to read warning
+        } else {
+          // Redirect immediately if verified
+          router.push('/academy/dashboard');
         }
-        
-        // Redirect to main academy dashboard
-        router.push('/academy/dashboard');
       } else {
         setError(data.error || 'Login failed. Please try again.');
       }
@@ -146,6 +183,30 @@ export default function AcademyLogin() {
                 </button>
               </div>
             </div>
+
+            {/* Verification Warning */}
+            {verificationWarning && (
+              <div className="bg-yellow-900/30 border border-yellow-500/50 rounded-xl p-4 backdrop-blur-sm">
+                <div className="flex items-start">
+                  <svg className="h-5 w-5 text-yellow-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-yellow-200 text-sm font-medium">{verificationWarning}</p>
+                    {showResendVerification && (
+                      <button
+                        type="button"
+                        onClick={handleResendVerification}
+                        disabled={isResending}
+                        className="mt-3 text-sm font-semibold text-yellow-400 hover:text-yellow-300 underline disabled:opacity-50"
+                      >
+                        {isResending ? 'Sending...' : 'Resend Verification Email'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (
