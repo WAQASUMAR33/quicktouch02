@@ -27,7 +27,7 @@ export default function Home() {
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-gradient-to-r from-red-500 to-orange-600 text-white gap-2 hover:from-red-600 hover:to-orange-700 font-semibold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto shadow-lg"
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-yellow-500 text-gray-900 gap-2 hover:bg-yellow-600 font-semibold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto shadow-lg"
             href="/admin/login"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
