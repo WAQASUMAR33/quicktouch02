@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { generateToken } from '@/lib/auth';
+import { sendVerificationEmail } from '@/lib/email';
 
 // POST /api/auth/academy/register - Register a new academy
 export async function POST(req) {
@@ -98,19 +99,20 @@ export async function POST(req) {
       type: 'academy'
     });
 
-    // TODO: Send verification email
-    // You can implement email sending here using services like:
-    // - Nodemailer
-    // - SendGrid
-    // - AWS SES
-    // const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/academy/verify-email?token=${verificationToken}`;
+    // Send verification email
+    try {
+      await sendVerificationEmail(academy.email, academy.name, verificationToken);
+      console.log('Verification email sent successfully to:', academy.email);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // Don't fail registration if email fails, just log it
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Academy registered successfully. Please check your email to verify your account.',
       academy,
-      token,
-      verificationToken // For testing purposes - remove in production
+      token
     }, { status: 201 });
 
   } catch (error) {

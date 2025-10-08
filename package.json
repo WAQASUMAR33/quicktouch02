@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.6.5",
     "next": "15.5.3",
+    "nodemailer": "^7.0.9",
     "prisma": "^6.16.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"

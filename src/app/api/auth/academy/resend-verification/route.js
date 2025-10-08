@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
+import { sendVerificationEmail } from '@/lib/email';
 
 // POST /api/auth/academy/resend-verification - Resend verification email
 export async function POST(req) {
@@ -47,14 +48,21 @@ export async function POST(req) {
       }
     });
 
-    // TODO: Send verification email
-    // const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/academy/verify-email?token=${verificationToken}`;
-    // Send email with verificationUrl
+    // Send verification email
+    try {
+      await sendVerificationEmail(academy.email, academy.name, verificationToken);
+      console.log('Verification email resent successfully to:', academy.email);
+    } catch (emailError) {
+      console.error('Failed to resend verification email:', emailError);
+      return NextResponse.json(
+        { error: 'Failed to send verification email', details: emailError.message },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Verification email sent successfully. Please check your inbox.',
-      verificationToken // For testing purposes - remove in production
+      message: 'Verification email sent successfully. Please check your inbox.'
     });
 
   } catch (error) {

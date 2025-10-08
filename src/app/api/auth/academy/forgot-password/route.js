@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
+import { sendPasswordResetEmail } from '@/lib/email';
 
 // POST /api/auth/academy/forgot-password - Request password reset
 export async function POST(req) {
@@ -41,14 +42,18 @@ export async function POST(req) {
       }
     });
 
-    // TODO: Send password reset email
-    // const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/academy/reset-password?token=${resetToken}`;
-    // Send email with resetUrl
+    // Send password reset email
+    try {
+      await sendPasswordResetEmail(academy.email, academy.name, resetToken);
+      console.log('Password reset email sent successfully to:', academy.email);
+    } catch (emailError) {
+      console.error('Failed to send password reset email:', emailError);
+      // Don't reveal if email failed for security reasons
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'If an academy with that email exists, a password reset link has been sent.',
-      resetToken // For testing purposes - remove in production
+      message: 'If an academy with that email exists, a password reset link has been sent.'
     });
 
   } catch (error) {
