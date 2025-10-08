@@ -15,6 +15,8 @@ export default function AcademyDashboard() {
   const [recentEvents, setRecentEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState('');
+  const [currentTime, setCurrentTime] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -34,6 +36,27 @@ export default function AcademyDashboard() {
       loadDashboardData();
     }
   }, [user]);
+
+  useEffect(() => {
+    // Set current date and time on client side only
+    const updateDateTime = () => {
+      setCurrentDate(new Date().toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric' 
+      }));
+      setCurrentTime(new Date().toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }));
+    };
+    
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const loadDashboardData = async () => {
     try {
@@ -222,16 +245,10 @@ export default function AcademyDashboard() {
               {/* Right Side - Date/Time */}
               <div className="hidden md:block text-right">
                 <p className="text-sm font-medium text-white">
-                  {new Date().toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric' 
-                  })}
+                  {currentTime || 'Loading...'}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {new Date().toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
+                  Today
                 </p>
               </div>
             </div>
@@ -255,7 +272,7 @@ export default function AcademyDashboard() {
                 </h2>
               </div>
               <p className="text-gray-800 text-lg font-medium mb-4">
-                Here&apos;s your academy overview for {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                Here&apos;s your academy overview for {currentDate || 'today'}
               </p>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -267,7 +284,7 @@ export default function AcademyDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="text-sm text-gray-800 font-medium">
-                    Last updated: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    Last updated: {currentTime || 'now'}
                   </span>
                 </div>
               </div>
