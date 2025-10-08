@@ -111,6 +111,10 @@ export default function AcademyDashboard() {
     }
   };
 
+  const handleLogout = () => {
+    logoutAcademy();
+    router.push('/academy/login');
+  };
 
   if (isLoading) {
     return (
