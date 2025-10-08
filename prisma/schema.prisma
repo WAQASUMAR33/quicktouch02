@@ -244,17 +244,23 @@ model ShopItem {
 }
 
 model Academy {
-  academy_id     Int            @id @default(autoincrement())
-  name           String         @db.VarChar(150)
-  description    String?        @db.Text
-  address        String?        @db.VarChar(255)
-  phone          String?        @db.VarChar(20)
-  email          String?        @unique @db.VarChar(150)
-  website        String?        @db.VarChar(255)
-  logo_url       String?        @db.VarChar(255)
-  is_active      Boolean        @default(true)
-  created_at     DateTime       @default(now())
-  updated_at     DateTime       @updatedAt
+  academy_id            Int       @id @default(autoincrement())
+  name                  String    @db.VarChar(150)
+  email                 String    @unique @db.VarChar(150)
+  password              String    @db.VarChar(255)
+  email_verified        Boolean   @default(false)
+  email_verification_token String? @db.VarChar(255)
+  email_verification_expiry DateTime?
+  description           String?   @db.Text
+  address               String?   @db.VarChar(255)
+  phone                 String?   @db.VarChar(20)
+  website               String?   @db.VarChar(255)
+  logo_url              String?   @db.VarChar(255)
+  is_active             Boolean   @default(true)
+  reset_token           String?   @db.VarChar(255)
+  reset_token_expiry    DateTime?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
 
   // Relations
   users           User[]
