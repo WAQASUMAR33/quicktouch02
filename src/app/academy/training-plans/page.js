@@ -11,6 +11,7 @@ export default function TrainingPlans() {
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterType, setFilterType] = useState('all');
+  const [currentTime, setCurrentTime] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -43,25 +44,37 @@ export default function TrainingPlans() {
 
   useEffect(() => {
     // Check authentication
-    const token = localStorage.getItem('academy_token');
-    const userData = localStorage.getItem('academy_user');
+    const academyData = getAcademyData();
     
-    if (!token || !userData) {
+    if (!academyData) {
       router.push('/academy/login');
       return;
     }
 
-    const parsedUser = JSON.parse(userData);
-    
-    // Only coaches can access training plans
-    if (parsedUser.role !== 'coach') {
+    // Academies and coaches can access training plans
+    if (academyData.role !== 'coach' && academyData.role !== 'academy') {
       router.push('/academy/dashboard');
       return;
     }
 
-    setUser(parsedUser);
+    setUser(academyData);
     loadTrainingPlans();
   }, [router]);
+
+  useEffect(() => {
+    // Set current time on client side only
+    const updateTime = () => {
+      setCurrentTime(new Date().toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }));
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const loadTrainingPlans = async () => {
     try {
@@ -394,10 +407,10 @@ export default function TrainingPlans() {
 
               <div className="hidden md:block text-right">
                 <p className="text-sm font-medium text-white">
-                  {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {currentTime || 'Loading...'}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  Today
                 </p>
               </div>
             </div>

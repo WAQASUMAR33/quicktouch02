@@ -17,23 +17,20 @@ export default function MyPlayers() {
 
   useEffect(() => {
     // Check authentication
-    const token = localStorage.getItem('academy_token');
-    const userData = localStorage.getItem('academy_user');
+    const academyData = getAcademyData();
     
-    if (!token || !userData) {
+    if (!academyData) {
       router.push('/academy/login');
       return;
     }
 
-    const parsedUser = JSON.parse(userData);
-    
-    // Only coaches can access this page
-    if (parsedUser.role !== 'coach') {
+    // Academies and coaches can access players page
+    if (academyData.role !== 'coach' && academyData.role !== 'academy') {
       router.push('/academy/dashboard');
       return;
     }
 
-    setUser(parsedUser);
+    setUser(academyData);
     loadPlayers();
   }, [router]);
 
