@@ -43,14 +43,44 @@ export default function Profile() {
     }
 
     setUser(academyData);
-    loadProfile(parsedUser);
+    loadProfile(academyData);
   }, [router]);
 
   const loadProfile = async (userData) => {
     try {
       setIsLoading(true);
       
-      // Get user profile from auth/profile endpoint
+      // For academy role, use academy data directly
+      if (userData.role === 'academy') {
+        const fallbackData = {
+          academy_id: userData.academy_id,
+          full_name: userData.name || userData.fullName,
+          email: userData.email,
+          phone: userData.phone || '',
+          address: userData.address || '',
+          description: userData.description || '',
+          website: userData.website || '',
+          role: 'academy',
+          email_verified: userData.email_verified,
+          is_active: userData.is_active,
+          created_at: userData.created_at || new Date().toISOString(),
+          player_profile: null
+        };
+        setProfileData(fallbackData);
+        setEditData({
+          full_name: fallbackData.full_name || '',
+          phone: fallbackData.phone || '',
+          age: '',
+          height_cm: '',
+          weight_kg: '',
+          position: '',
+          preferred_foot: ''
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // For other roles, try to get user profile from API
       const response = await fetch('/api/auth/profile', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('academy_token')}`
