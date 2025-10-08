@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAcademyData, logoutAcademy, getRoleDisplayName, getRoleColor, getNavigationItems } from '@/lib/academyAuth';
 
 export default function MyPlayers() {
   const [user, setUser] = useState(null);
@@ -73,8 +74,7 @@ export default function MyPlayers() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('academy_token');
-    localStorage.removeItem('academy_user');
+    logoutAcademy();
     router.push('/academy/login');
   };
 
@@ -146,7 +146,7 @@ export default function MyPlayers() {
 
         <nav className="mt-6 px-4 flex-1 overflow-y-auto">
           <div className="space-y-2">
-            {getNavigationItems().map((item) => (
+            {getNavigationItems(user?.role, '/academy/players').map((item) => (
               <a
                 key={item.name}
                 href={item.href}
