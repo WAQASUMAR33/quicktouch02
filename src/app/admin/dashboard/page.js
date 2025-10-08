@@ -17,22 +17,27 @@ export default function AcademyDashboard() {
 
   useEffect(() => {
     // Check authentication
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
+    const token = localStorage.getItem('admin_token');
+    const userData = localStorage.getItem('admin_user');
     
     if (!token || !userData) {
       router.push('/admin/login');
       return;
     }
 
-    const parsedUser = JSON.parse(userData);
-    if (parsedUser.role !== 'admin') {
-      router.push('/admin/login');
-      return;
-    }
+    try {
+      const parsedUser = JSON.parse(userData);
+      if (parsedUser.role !== 'admin') {
+        router.push('/admin/login');
+        return;
+      }
 
-    setUser(parsedUser);
-    loadDashboardData();
+      setUser(parsedUser);
+      loadDashboardData();
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      router.push('/admin/login');
+    }
   }, [router]);
 
   const loadDashboardData = async () => {
@@ -71,8 +76,8 @@ export default function AcademyDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_user');
     router.push('/admin/login');
   };
 
