@@ -259,7 +259,10 @@ QuickTouch Academy
     console.error('❌ Error sending test email:', error);
     console.error('   Error code:', error.code);
     console.error('   Error message:', error.message);
+    console.error('   Error stack:', error.stack);
     if (error.response) console.error('   SMTP Response:', error.response);
+    if (error.responseCode) console.error('   Response Code:', error.responseCode);
+    if (error.command) console.error('   SMTP Command:', error.command);
     
     return NextResponse.json({
       success: false,
@@ -267,7 +270,17 @@ QuickTouch Academy
       details: {
         code: error.code,
         message: error.message,
-        response: error.response
+        response: error.response,
+        responseCode: error.responseCode,
+        command: error.command,
+        stack: error.stack
+      },
+      troubleshooting: {
+        checkEnvVars: 'Verify all EMAIL_* variables are set in Vercel',
+        checkSMTP: 'Test SMTP credentials with your email provider',
+        checkFirewall: 'Ensure Vercel can access smtp.hostinger.com:587',
+        alternativePort: 'Try port 465 (SSL) or 2525',
+        alternative: 'Consider using SendGrid for better Vercel compatibility'
       }
     }, { status: 500 });
   }
