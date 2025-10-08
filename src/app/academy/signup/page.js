@@ -5,18 +5,14 @@ import { useRouter } from 'next/navigation';
 
 export default function AcademySignup() {
   const [formData, setFormData] = useState({
-    full_name: '',
+    name: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'player',
-    // Player specific fields
-    age: '',
-    height_cm: '',
-    weight_kg: '',
-    position: '',
-    preferred_foot: ''
+    address: '',
+    description: '',
+    website: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -51,51 +47,32 @@ export default function AcademySignup() {
     }
 
     try {
-      let response;
-      
-      if (formData.role === 'player') {
-        // Use player registration endpoint
-        response = await fetch('/api/players/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            full_name: formData.full_name,
-            email: formData.email,
-            phone: formData.phone,
-            password: formData.password,
-            academy_id: null,
-            age: formData.age ? parseInt(formData.age) : null,
-            height_cm: formData.height_cm ? parseInt(formData.height_cm) : null,
-            weight_kg: formData.weight_kg ? parseInt(formData.weight_kg) : null,
-            position: formData.position || null,
-            preferred_foot: formData.preferred_foot || null
-          }),
-        });
-      } else {
-        // Use general registration endpoint for coach/scout
-        response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            full_name: formData.full_name,
-            email: formData.email,
-            phone: formData.phone,
-            password: formData.password,
-            role: formData.role
-          }),
-        });
-      }
+      // Use academy registration endpoint
+      const response = await fetch('/api/auth/academy/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          address: formData.address,
+          description: formData.description,
+          website: formData.website
+        }),
+      });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Store token and user data
+        // Store token and academy data
         localStorage.setItem('academy_token', data.token);
-        localStorage.setItem('academy_user', JSON.stringify(data.user));
+        localStorage.setItem('academy_data', JSON.stringify(data.academy));
+        
+        // Show success message about email verification
+        alert('Academy registered successfully! Please check your email to verify your account.');
         
         // Redirect to dashboard
         router.push('/academy/dashboard');
@@ -127,53 +104,35 @@ export default function AcademySignup() {
             </svg>
           </div>
           <h2 className="mt-6 text-4xl font-bold text-white">
-            Join Academy Portal
+            Register Your Academy
           </h2>
           <p className="mt-3 text-base text-gray-400">
-            Create your account to get started
+            Create your academy account to get started
           </p>
         </div>
 
         {/* Registration Form */}
         <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-700/50">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Role Selection */}
+            {/* Academy Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-200 mb-2">
-                Register as *
+              <label htmlFor="name" className="block text-sm font-semibold text-gray-200 mb-2">
+                Academy Name *
               </label>
-              <select
-                name="role"
+              <input
+                id="name"
+                name="name"
+                type="text"
                 required
-                value={formData.role}
+                value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="player">Player</option>
-                <option value="coach">Coach</option>
-                <option value="scout">Scout</option>
-                <option value="admin">Admin</option>
-              </select>
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+                placeholder="Enter academy name"
+              />
             </div>
 
-            {/* Basic Information */}
+            {/* Contact Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="full_name" className="block text-sm font-semibold text-gray-200 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  id="full_name"
-                  name="full_name"
-                  type="text"
-                  required
-                  value={formData.full_name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your full name"
-                />
-              </div>
-
               <div>
                 <label htmlFor="phone" className="block text-sm font-semibold text-gray-200 mb-2">
                   Phone Number
@@ -186,6 +145,21 @@ export default function AcademySignup() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
                   placeholder="+1234567890"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="website" className="block text-sm font-semibold text-gray-200 mb-2">
+                  Website
+                </label>
+                <input
+                  id="website"
+                  name="website"
+                  type="url"
+                  value={formData.website}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+                  placeholder="https://yourwebsite.com"
                 />
               </div>
             </div>
@@ -213,6 +187,38 @@ export default function AcademySignup() {
                   placeholder="your.email@academy.com"
                 />
               </div>
+            </div>
+
+            {/* Address */}
+            <div>
+              <label htmlFor="address" className="block text-sm font-semibold text-gray-200 mb-2">
+                Address
+              </label>
+              <input
+                id="address"
+                name="address"
+                type="text"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+                placeholder="Academy address"
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label htmlFor="description" className="block text-sm font-semibold text-gray-200 mb-2">
+                Description
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                rows="3"
+                value={formData.description}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200 resize-none"
+                placeholder="Brief description of your academy"
+              />
             </div>
 
             {/* Password Fields */}
@@ -265,105 +271,6 @@ export default function AcademySignup() {
                 </div>
               </div>
             </div>
-
-            {/* Player-specific fields */}
-            {formData.role === 'player' && (
-              <div className="border-t border-gray-700 pt-6 mt-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Player Information (Optional)</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="age" className="block text-sm font-medium text-gray-200 mb-2">
-                      Age
-                    </label>
-                    <input
-                      id="age"
-                      name="age"
-                      type="number"
-                      min="5"
-                      max="50"
-                      value={formData.age}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                      placeholder="Your age"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="position" className="block text-sm font-medium text-gray-200 mb-2">
-                      Position
-                    </label>
-                    <select
-                      id="position"
-                      name="position"
-                      value={formData.position}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="">Select position</option>
-                      <option value="Goalkeeper">Goalkeeper</option>
-                      <option value="Defender">Defender</option>
-                      <option value="Midfielder">Midfielder</option>
-                      <option value="Forward">Forward</option>
-                      <option value="Winger">Winger</option>
-                      <option value="Striker">Striker</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="height_cm" className="block text-sm font-medium text-gray-200 mb-2">
-                      Height (cm)
-                    </label>
-                    <input
-                      id="height_cm"
-                      name="height_cm"
-                      type="number"
-                      min="100"
-                      max="250"
-                      value={formData.height_cm}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                      placeholder="180"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="weight_kg" className="block text-sm font-medium text-gray-200 mb-2">
-                      Weight (kg)
-                    </label>
-                    <input
-                      id="weight_kg"
-                      name="weight_kg"
-                      type="number"
-                      min="20"
-                      max="150"
-                      value={formData.weight_kg}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                      placeholder="75"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label htmlFor="preferred_foot" className="block text-sm font-medium text-gray-200 mb-2">
-                      Preferred Foot
-                    </label>
-                    <select
-                      id="preferred_foot"
-                      name="preferred_foot"
-                      value={formData.preferred_foot}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="">Select preferred foot</option>
-                      <option value="Left">Left</option>
-                      <option value="Right">Right</option>
-                      <option value="Both">Both</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Error Message */}
             {error && (

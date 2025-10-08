@@ -28,7 +28,7 @@ export default function AcademyLogin() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/academy/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,18 +39,17 @@ export default function AcademyLogin() {
       const data = await response.json();
 
       if (response.ok) {
-        // Check if user has valid role (admin, coach, player, scout)
-        const allowedRoles = ['admin', 'coach', 'player', 'scout'];
-        if (allowedRoles.includes(data.user.role)) {
-          // Store token and user data
-          localStorage.setItem('academy_token', data.token);
-          localStorage.setItem('academy_user', JSON.stringify(data.user));
-          
-          // Redirect to main academy dashboard
-          router.push('/academy/dashboard');
-        } else {
-          setError('Access denied. Invalid user role.');
+        // Store token and academy data
+        localStorage.setItem('academy_token', data.token);
+        localStorage.setItem('academy_data', JSON.stringify(data.academy));
+        
+        // Show warning if email not verified
+        if (!data.emailVerified) {
+          setError('Warning: Please verify your email address. Check your inbox or resend verification.');
         }
+        
+        // Redirect to main academy dashboard
+        router.push('/academy/dashboard');
       } else {
         setError(data.error || 'Login failed. Please try again.');
       }
