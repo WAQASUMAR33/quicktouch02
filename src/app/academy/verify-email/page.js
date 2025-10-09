@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function VerifyEmail() {
-  const [status, setStatus] = useState('verifying'); // verifying, success, error
+  const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,7 +34,7 @@ export default function VerifyEmail() {
 
       if (response.ok) {
         setStatus('success');
-        setMessage('Your email has been verified successfully! Redirecting to login...');
+        setMessage('Your email has been verified successfully!');
         setTimeout(() => {
           router.push('/academy/login');
         }, 3000);
@@ -50,35 +50,28 @@ export default function VerifyEmail() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-yellow-400/10 to-transparent rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-yellow-500/10 to-transparent rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-      </div>
-
-      <div className="max-w-md w-full space-y-8 relative z-10">
-        {/* Card */}
-        <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-700/50">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-950">
+      <div className="w-full max-w-md">
+        <div className="bg-gray-900 rounded-lg p-8 shadow-xl border border-gray-800 text-center">
           {/* Icon */}
           <div className="flex justify-center mb-6">
             {status === 'verifying' && (
-              <div className="h-20 w-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center animate-pulse">
-                <svg className="h-10 w-10 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500 bg-opacity-20">
+                <svg className="w-8 h-8 text-yellow-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>
             )}
             {status === 'success' && (
-              <div className="h-20 w-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-                <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500 bg-opacity-20">
+                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
             )}
             {status === 'error' && (
-              <div className="h-20 w-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center">
-                <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500 bg-opacity-20">
+                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
@@ -86,46 +79,33 @@ export default function VerifyEmail() {
           </div>
 
           {/* Title */}
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold text-white mb-2">
-              {status === 'verifying' && 'Verifying Email...'}
-              {status === 'success' && 'Email Verified! 🎉'}
-              {status === 'error' && 'Verification Failed'}
-            </h2>
-            <p className="text-gray-400">
-              {status === 'verifying' && 'Please wait while we verify your email address'}
-              {status === 'success' && 'Your account is now active'}
-              {status === 'error' && 'We couldn\'t verify your email'}
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {status === 'verifying' && 'Verifying Email...'}
+            {status === 'success' && 'Email Verified! 🎉'}
+            {status === 'error' && 'Verification Failed'}
+          </h2>
 
           {/* Message */}
-          <div className={`p-4 rounded-xl border ${
-            status === 'verifying' ? 'bg-yellow-900/20 border-yellow-500/30' :
-            status === 'success' ? 'bg-green-900/20 border-green-500/30' :
-            'bg-red-900/20 border-red-500/30'
+          <p className={`mb-6 ${
+            status === 'verifying' ? 'text-yellow-400' :
+            status === 'success' ? 'text-green-400' :
+            'text-red-400'
           }`}>
-            <p className={`text-center ${
-              status === 'verifying' ? 'text-yellow-200' :
-              status === 'success' ? 'text-green-200' :
-              'text-red-200'
-            }`}>
-              {message || 'Processing your request...'}
-            </p>
-          </div>
+            {message || 'Processing your request...'}
+          </p>
 
           {/* Actions */}
           {status === 'error' && (
-            <div className="mt-6 space-y-3">
+            <div className="space-y-3">
               <button
                 onClick={() => router.push('/academy/login')}
-                className="w-full py-3 px-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-xl transition-colors duration-200"
+                className="w-full py-3 px-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 font-semibold rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all"
               >
                 Go to Login
               </button>
               <button
                 onClick={() => router.push('/academy/signup')}
-                className="w-full py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-colors duration-200"
+                className="w-full py-3 px-4 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition-all"
               >
                 Register Again
               </button>
@@ -133,25 +113,23 @@ export default function VerifyEmail() {
           )}
 
           {status === 'success' && (
-            <div className="mt-6">
-              <div className="flex items-center justify-center text-sm text-gray-400">
-                <svg className="animate-spin h-4 w-4 mr-2 text-yellow-500" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Redirecting to login page...
-              </div>
+            <div className="flex items-center justify-center text-sm text-gray-400">
+              <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Redirecting to login page...
             </div>
           )}
         </div>
 
         {/* Back to Home */}
-        <div className="text-center">
+        <div className="mt-6 text-center">
           <button
             onClick={() => router.push('/')}
-            className="inline-flex items-center text-gray-400 hover:text-white text-sm font-medium transition-colors duration-200 group"
+            className="text-sm text-gray-400 hover:text-white inline-flex items-center"
           >
-            <svg className="h-4 w-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to Home
@@ -161,4 +139,3 @@ export default function VerifyEmail() {
     </div>
   );
 }
-
