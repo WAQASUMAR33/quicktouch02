@@ -25,7 +25,7 @@ async function sendVerificationEmail(to, name, verificationToken) {
     console.log('  From:', process.env.EMAIL_FROM);
     
     // Create transporter
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
@@ -171,7 +171,7 @@ async function sendPasswordResetEmail(to, name, resetToken) {
     }
     
     // Create transporter
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
@@ -307,7 +307,7 @@ async function testEmailConfiguration() {
     }
     
     // Create transporter
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
