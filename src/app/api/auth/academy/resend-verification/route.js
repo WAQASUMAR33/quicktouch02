@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
-import { sendVerificationEmail } from '@/lib/email';
+const { sendVerificationEmail } = require('@/lib/email');
 
 // POST /api/auth/academy/resend-verification - Resend verification email
 export async function POST(req) {

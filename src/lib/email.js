@@ -1,17 +1,8 @@
-// Use dynamic import for nodemailer to avoid Next.js build issues
-let nodemailer;
-
-// Lazy load nodemailer
-const getNodemailer = async () => {
-  if (!nodemailer) {
-    nodemailer = (await import('nodemailer')).default;
-  }
-  return nodemailer;
-};
+// Import nodemailer - using require for better Next.js compatibility
+const nodemailer = require('nodemailer');
 
 // Create reusable transporter
-const createTransporter = async () => {
-  const mailer = await getNodemailer();
+const createTransporter = () => {
   
   // Validate required environment variables
   const requiredVars = {
@@ -37,7 +28,7 @@ const createTransporter = async () => {
   console.log('  User:', process.env.EMAIL_SERVER_USER);
   console.log('  From:', process.env.EMAIL_FROM);
 
-  return mailer.createTransporter({
+  return nodemailer.createTransporter({
     host: process.env.EMAIL_SERVER_HOST,
     port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
     secure: false, // true for 465, false for other ports
@@ -52,12 +43,12 @@ const createTransporter = async () => {
 };
 
 // Send email verification
-export async function sendVerificationEmail(to, name, verificationToken) {
+async function sendVerificationEmail(to, name, verificationToken) {
   try {
     console.log('📤 Sending verification email to:', to);
     console.log('   Verification token:', verificationToken);
     
-    const transporter = await createTransporter();
+    const transporter = createTransporter();
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/academy/verify-email?token=${verificationToken}`;
     
     console.log('   Verification URL:', verificationUrl);
@@ -175,9 +166,9 @@ The QuickTouch Team
 }
 
 // Send password reset email
-export async function sendPasswordResetEmail(to, name, resetToken) {
+async function sendPasswordResetEmail(to, name, resetToken) {
   try {
-    const transporter = await createTransporter();
+    const transporter = createTransporter();
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/academy/reset-password?token=${resetToken}`;
     
     const mailOptions = {
@@ -302,9 +293,9 @@ The QuickTouch Team
 }
 
 // Test email configuration
-export async function testEmailConfiguration() {
+async function testEmailConfiguration() {
   try {
-    const transporter = await createTransporter();
+    const transporter = createTransporter();
     await transporter.verify();
     console.log('Email server is ready to send messages');
     return { success: true, message: 'Email configuration is valid' };
@@ -314,3 +305,9 @@ export async function testEmailConfiguration() {
   }
 }
 
+// Export functions
+module.exports = {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  testEmailConfiguration
+};
