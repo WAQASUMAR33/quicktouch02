@@ -21,7 +21,6 @@ export default function AcademyLogin() {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
     if (error) setError('');
   };
 
@@ -71,20 +70,16 @@ export default function AcademyLogin() {
       const data = await response.json();
 
       if (response.ok) {
-        // Store token and academy data
         localStorage.setItem('academy_token', data.token);
         localStorage.setItem('academy_data', JSON.stringify(data.academy));
         
-        // Check if email is verified
         if (!data.emailVerified) {
           setVerificationWarning('⚠️ Your email is not verified. Please check your inbox or resend verification email below.');
           setShowResendVerification(true);
-          // Still redirect but show warning first
           setTimeout(() => {
             router.push('/academy/dashboard');
-          }, 4000); // 4 seconds to read warning
+          }, 4000);
         } else {
-          // Redirect immediately if verified
           router.push('/academy/dashboard');
         }
       } else {
@@ -100,21 +95,17 @@ export default function AcademyLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Enhanced Animated Background Elements */}
+      {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Gradient Orbs */}
         <div className="absolute top-0 -left-1/4 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
         <div className="absolute top-0 -right-1/4 w-96 h-96 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-yellow-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
-        
-        {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
       </div>
 
       <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Header */}
         <div className="text-center">
-          {/* Logo with enhanced glow effect */}
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-yellow-500/20 blur-2xl rounded-full"></div>
             <div className="relative mx-auto h-24 w-24 bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 rounded-3xl flex items-center justify-center shadow-2xl transform hover:scale-105 hover:rotate-3 transition-all duration-300">
@@ -134,8 +125,8 @@ export default function AcademyLogin() {
 
         {/* Login Form */}
         <div className="bg-gradient-to-b from-gray-800/60 to-gray-900/60 backdrop-blur-2xl rounded-3xl shadow-2xl p-10 border border-gray-700/50 relative">
-          {/* Top accent line */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent rounded-full"></div>
+          
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email Field */}
             <div className="group">
@@ -267,7 +258,6 @@ export default function AcademyLogin() {
               disabled={isLoading}
               className="relative w-full group overflow-hidden py-4 px-4 border-2 border-yellow-500/20 rounded-2xl shadow-2xl text-base font-bold text-gray-900 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 hover:from-yellow-500 hover:via-amber-600 hover:to-yellow-700 focus:outline-none focus:ring-4 focus:ring-yellow-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] hover:shadow-yellow-500/20"
             >
-              {/* Button glow effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-amber-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></div>
               
               <div className="relative flex justify-center items-center">
