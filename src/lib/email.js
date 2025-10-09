@@ -1,5 +1,4 @@
-// Email utility using nodemailer with inline transporter creation
-// This approach avoids Next.js build minification issues
+// Email utility using nodemailer - Optimized for Vercel/serverless
 
 // Send email verification
 async function sendVerificationEmail(to, name, verificationToken) {
@@ -7,11 +6,11 @@ async function sendVerificationEmail(to, name, verificationToken) {
     console.log('📤 Sending verification email to:', to);
     console.log('   Verification token:', verificationToken);
     
-    // Import nodemailer dynamically
-    const nodemailer = require('nodemailer');
+    // Dynamic import for better serverless compatibility
+    const nodemailer = await import('nodemailer');
     
-    // Create transporter inline
-    const transporter = nodemailer.createTransporter({
+    // Create transporter
+    const transporter = nodemailer.default.createTransporter({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
@@ -146,11 +145,11 @@ async function sendVerificationEmail(to, name, verificationToken) {
 // Send password reset email
 async function sendPasswordResetEmail(to, name, resetToken) {
   try {
-    // Import nodemailer dynamically
-    const nodemailer = require('nodemailer');
+    // Dynamic import for better serverless compatibility
+    const nodemailer = await import('nodemailer');
     
-    // Create transporter inline
-    const transporter = nodemailer.createTransporter({
+    // Create transporter
+    const transporter = nodemailer.default.createTransporter({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
@@ -275,11 +274,11 @@ async function sendPasswordResetEmail(to, name, resetToken) {
 // Test email configuration
 async function testEmailConfiguration() {
   try {
-    // Import nodemailer dynamically
-    const nodemailer = require('nodemailer');
+    // Dynamic import for better serverless compatibility
+    const nodemailer = await import('nodemailer');
     
-    // Create transporter inline
-    const transporter = nodemailer.createTransporter({
+    // Create transporter
+    const transporter = nodemailer.default.createTransporter({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
