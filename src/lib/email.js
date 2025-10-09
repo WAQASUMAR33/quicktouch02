@@ -1,4 +1,5 @@
 // Email utility using nodemailer - Optimized for Vercel/serverless
+// Using mixed import approach for maximum compatibility
 
 // Send email verification
 async function sendVerificationEmail(to, name, verificationToken) {
@@ -6,11 +7,25 @@ async function sendVerificationEmail(to, name, verificationToken) {
     console.log('📤 Sending verification email to:', to);
     console.log('   Verification token:', verificationToken);
     
-    // Dynamic import for better serverless compatibility
-    const nodemailer = await import('nodemailer');
+    // Try dynamic import with fallback
+    let nodemailer;
+    try {
+      const imported = await import('nodemailer');
+      // Handle both default and named exports
+      nodemailer = imported.default || imported;
+    } catch (e) {
+      console.log('Dynamic import failed, using require:', e.message);
+      nodemailer = require('nodemailer');
+    }
+    
+    console.log('📧 Email Configuration:');
+    console.log('  Host:', process.env.EMAIL_SERVER_HOST);
+    console.log('  Port:', process.env.EMAIL_SERVER_PORT);
+    console.log('  User:', process.env.EMAIL_SERVER_USER);
+    console.log('  From:', process.env.EMAIL_FROM);
     
     // Create transporter
-    const transporter = nodemailer.default.createTransporter({
+    const transporter = nodemailer.createTransporter({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
@@ -145,11 +160,18 @@ async function sendVerificationEmail(to, name, verificationToken) {
 // Send password reset email
 async function sendPasswordResetEmail(to, name, resetToken) {
   try {
-    // Dynamic import for better serverless compatibility
-    const nodemailer = await import('nodemailer');
+    // Try dynamic import with fallback
+    let nodemailer;
+    try {
+      const imported = await import('nodemailer');
+      nodemailer = imported.default || imported;
+    } catch (e) {
+      console.log('Dynamic import failed, using require:', e.message);
+      nodemailer = require('nodemailer');
+    }
     
     // Create transporter
-    const transporter = nodemailer.default.createTransporter({
+    const transporter = nodemailer.createTransporter({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
@@ -274,11 +296,18 @@ async function sendPasswordResetEmail(to, name, resetToken) {
 // Test email configuration
 async function testEmailConfiguration() {
   try {
-    // Dynamic import for better serverless compatibility
-    const nodemailer = await import('nodemailer');
+    // Try dynamic import with fallback
+    let nodemailer;
+    try {
+      const imported = await import('nodemailer');
+      nodemailer = imported.default || imported;
+    } catch (e) {
+      console.log('Dynamic import failed, using require:', e.message);
+      nodemailer = require('nodemailer');
+    }
     
     // Create transporter
-    const transporter = nodemailer.default.createTransporter({
+    const transporter = nodemailer.createTransporter({
       host: process.env.EMAIL_SERVER_HOST,
       port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
       secure: false,
