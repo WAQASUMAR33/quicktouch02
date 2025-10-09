@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
-import { sendPasswordResetEmail } from '@/lib/emailSendGrid';
+import { sendPasswordResetEmail } from '@/lib/email';
 
 // POST /api/auth/academy/forgot-password - Request password reset
 export async function POST(req) {

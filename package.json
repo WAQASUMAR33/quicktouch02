@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
-    "@sendgrid/mail": "^8.1.6",
     "bcryptjs": "^2.4.3",
     "date-fns": "^2.30.0",
     "jsonwebtoken": "^9.0.2",
@@ -34,7 +33,6 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
-    "smtp-client": "^0.4.0",
     "tailwindcss": "^4"
   }
 }
