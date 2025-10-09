@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 
 // Create reusable transporter
 const createTransporter = () => {
+  
   // Validate required environment variables
   const requiredVars = {
     EMAIL_SERVER_HOST: process.env.EMAIL_SERVER_HOST,
