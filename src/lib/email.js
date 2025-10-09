@@ -1,7 +1,17 @@
-import nodemailer from 'nodemailer';
+// Use dynamic import for nodemailer to avoid Next.js build issues
+let nodemailer;
+
+// Lazy load nodemailer
+const getNodemailer = async () => {
+  if (!nodemailer) {
+    nodemailer = (await import('nodemailer')).default;
+  }
+  return nodemailer;
+};
 
 // Create reusable transporter
-const createTransporter = () => {
+const createTransporter = async () => {
+  const mailer = await getNodemailer();
   
   // Validate required environment variables
   const requiredVars = {
@@ -27,7 +37,7 @@ const createTransporter = () => {
   console.log('  User:', process.env.EMAIL_SERVER_USER);
   console.log('  From:', process.env.EMAIL_FROM);
 
-  return nodemailer.createTransporter({
+  return mailer.createTransporter({
     host: process.env.EMAIL_SERVER_HOST,
     port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
     secure: false, // true for 465, false for other ports
@@ -47,7 +57,7 @@ export async function sendVerificationEmail(to, name, verificationToken) {
     console.log('📤 Sending verification email to:', to);
     console.log('   Verification token:', verificationToken);
     
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/academy/verify-email?token=${verificationToken}`;
     
     console.log('   Verification URL:', verificationUrl);
@@ -167,7 +177,7 @@ The QuickTouch Team
 // Send password reset email
 export async function sendPasswordResetEmail(to, name, resetToken) {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/academy/reset-password?token=${resetToken}`;
     
     const mailOptions = {
@@ -294,7 +304,7 @@ The QuickTouch Team
 // Test email configuration
 export async function testEmailConfiguration() {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     await transporter.verify();
     console.log('Email server is ready to send messages');
     return { success: true, message: 'Email configuration is valid' };
