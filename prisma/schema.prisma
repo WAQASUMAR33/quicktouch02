@@ -161,12 +161,12 @@ model Event {
   event_date  DateTime
   location    String?   @db.VarChar(150)
   description String?   @db.Text
-  created_by  Int
+  created_by  Int?
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 
   // Relations
-  creator     User         @relation(fields: [created_by], references: [user_id], onDelete: Cascade)
+  creator     User?        @relation(fields: [created_by], references: [user_id], onDelete: Cascade)
   attendance  Attendance[]
 
   @@map("Events")
@@ -283,7 +283,7 @@ enum PreferredFoot {
   Left
   Right
   Both
-}
+} 
 
 enum EventType {
   training

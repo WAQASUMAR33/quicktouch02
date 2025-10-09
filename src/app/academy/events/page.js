@@ -106,7 +106,7 @@ export default function AcademyEvents() {
     try {
       const eventData = {
         ...newEvent,
-        created_by: user.academy_id || 1 // Use academy_id or fallback to 1
+        created_by: null // Events can be created without user reference
       };
 
       const response = await fetch('/api/admin/events-simple', {

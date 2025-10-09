@@ -63,9 +63,9 @@ export async function POST(req) {
     } = await req.json();
 
     // Validate required fields
-    if (!title || !type || !event_date || !created_by) {
+    if (!title || !type || !event_date) {
       return NextResponse.json(
-        { error: 'Title, type, event date, and created_by are required' },
+        { error: 'Title, type, and event date are required' },
         { status: 400 }
       );
     }
@@ -86,7 +86,7 @@ export async function POST(req) {
         event_date: new Date(event_date),
         location,
         description,
-        created_by: parseInt(created_by)
+        created_by: created_by ? parseInt(created_by) : null
       }
     });
 
