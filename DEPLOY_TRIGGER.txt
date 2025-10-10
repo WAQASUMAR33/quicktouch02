@@ -1,0 +1,4 @@
+Deployment trigger to ensure verify-email page is deployed
+Timestamp: 2025-10-10
+Last update: Force redeploy with verify-email page
+
