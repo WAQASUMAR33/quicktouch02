@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import crypto from 'crypto';
 
 // POST /api/auth/academy/verify-email - Verify academy email
 export async function POST(req) {
@@ -15,16 +14,12 @@ export async function POST(req) {
     }
 
     console.log('📧 Verifying email with token:', token);
+    console.log('🔍 Looking for academy with this token...');
 
-    // Hash the token to match what's stored in database
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-    
-    console.log('🔍 Looking for academy with hashed token...');
-
-    // Find academy with this verification token
+    // Find academy with this verification token (stored as plain text)
     const academy = await prisma.academy.findFirst({
       where: {
-        email_verification_token: hashedToken,
+        email_verification_token: token,
         email_verification_expiry: {
           gt: new Date() // Token must not be expired
         }
